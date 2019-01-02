@@ -1,0 +1,9 @@
+{
+  "name": "mk-base-adapter",
+  "version": "0.0.1",
+  "description": "Basic CRUD adapter logic for express requests",
+  "main": "index.js",
+  "repository": "https://github.com/mkastner/mk-base-adapter.git",
+  "author": "John Galt",
+  "license": "MIT"
+}
