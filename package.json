@@ -1,9 +1,26 @@
 {
   "name": "mk-base-adapter",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Basic CRUD adapter logic for express requests",
-  "main": "index.js",
+  "main": "lib/index.js",
   "repository": "https://github.com/mkastner/mk-base-adapter.git",
   "author": "John Galt",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "db:create": "NODE_ENV=test node test/db/create.js",
+    "db:migration": "NODE_ENV=test knex migrate:make --knexfile=test/db/knexfile.js",
+    "db:migrate": "NODE_ENV=test knex migrate:latest --knexfile=test/db/knexfile.js",
+    "db:rollback": "NODE_ENV=test knex migrate:rollback --knexfile=test/db/knexfile.js",
+    "test": "NODE_ENV=test node test/base-adapter.test.js"
+  },
+  "devDependencies": {
+    "bookshelf": "^0.14.2",
+    "knex": "^0.14.6",
+    "mysql": "^2.16.0",
+    "tape": "^4.9.2"
+  },
+  "dependencies": {
+    "moment": "^2.23.0",
+    "pluralize": "^7.0.0"
+  }
 }
