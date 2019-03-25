@@ -1,6 +1,6 @@
 {
   "name": "mk-base-adapter",
-  "version": "0.1.0",
+  "version": "0.0.2",
   "description": "Basic CRUD adapter logic for express requests",
   "main": "lib/index.js",
   "repository": "https://github.com/mkastner/mk-base-adapter.git",
@@ -14,12 +14,15 @@
     "test": "NODE_ENV=test node test/base-adapter.test.js"
   },
   "devDependencies": {
+    "mk-log": "https://github.com/mkastner/mk-adapter-test-helpers.git#v0.0.2",
     "bookshelf": "^0.14.2",
     "knex": "^0.14.6",
     "mysql": "^2.16.0",
+    "qs": "^6.7.0",
     "tape": "^4.9.2"
   },
   "dependencies": {
+    "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.7",
     "moment": "^2.23.0",
     "pluralize": "^7.0.0"
   }

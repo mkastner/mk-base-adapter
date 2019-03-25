@@ -1,4 +1,4 @@
-const log = require('../lib/utils/base-log')(this);
+const log = require('mk-log');
 const TestItemModel = require('./db/models/test-item-model');
 const Moment = require('moment');
 const dateFormat = 'YYYY-MM-DD HH:mm:ss'; 
@@ -7,21 +7,12 @@ const {
   create,
   createMultiple, 
   remove,
-  removeMultiple, 
   update,
   read,
-  readMultiple,
-  list,
-  scoped,
-  modified 
+  list
 } = require('../lib/index.js')(TestItemModel, {listKey: 'items'});
 
 const AdapterTestHelpers = require('mk-adapter-test-helpers');
-
-const obj = require('mk-adapter-test-helpers')();
-
-log.info('obj', JSON.stringify(obj));
-
 
 const testItemFixtureA = {
   parent_id: 1, 
@@ -74,7 +65,7 @@ async function main() {
       await create(req, res);
       const createdModel = res.data;
 
-      t.equals(req.body.email, createdModel.email, 'equal created email');
+      t.equals(req.body.email, createdModel.email, 'created model with field email');
 
     } catch (err) {
       log.error(err);
@@ -89,10 +80,11 @@ async function main() {
       await clearTable();
       const {req, res} = AdapterTestHelpers();
       req.body = [testItemFixtureA, testItemFixtureB];
+
       await createMultiple(req, res);
       const createdModels = res.data;
 
-      t.equals(createdModels.length, 2, 'creatd multiple records');
+      t.equals(createdModels.length, 2, 'created multiple records');
 
     } catch (err) {
       log.error(err);
@@ -109,9 +101,8 @@ async function main() {
       const id = createdModel.id;
       req.params.id = id;
       await remove(req, res);
-      let removedUser = await TestItemModel.where({id}).fetch();
-
-      t.equals(null, removedUser, 'should be removed');
+      const removedUser = await TestItemModel.where({id}).fetch();
+      t.notOk(removedUser, 'should be removed');
 
     } catch (err) {
       log.error(err);
@@ -128,8 +119,8 @@ async function main() {
       const idA = createdModelA.id;
       const createdModelB = await new TestItemModel(testItemFixtureA).save();
       const idB = createdModelB.id;
-      req.params.ids = `${idA}-${idB}`; 
-      await removeMultiple(req, res);
+      req.params.id = `${idA}+${idB}`; 
+      await remove(req, res);
       let remainingUsers = await TestItemModel.where('id', '>=', 0).fetchAll();
 
       t.equals(remainingUsers.toJSON().length, 0, 'should be removed');
@@ -158,28 +149,6 @@ async function main() {
       t.end(); 
     }
   });
-  
-  await tape('Adapter Base read multiple', async function(t) {
-    try {
-      const {req, res} = AdapterTestHelpers();
-      const createdModelA = await new TestItemModel(testItemFixtureA).save();
-      const idA = createdModelA.id;
-      const createdModelB = await new TestItemModel(testItemFixtureB).save();
-      const idB = createdModelB.id;
-      req.params.ids = [idA,idB].join('-');
-      await readMultiple(req, res);
-      t.equals(2, res.data.length, 'multiple should be read');
-      req.params.ids = idA;
-      await readMultiple(req, res);
-      t.equals(1, res.data.length, 'multiple should be read');
-
-    } catch (err) {
-      log.error(err);
-    } finally {
-      t.end(); 
-    }
-  });
-  
 
   await tape('Adapter Base list', async function(t) {
     
@@ -191,12 +160,11 @@ async function main() {
       
       await new TestItemModel(testItemFixtureA).save();
       const createdModelB = await new TestItemModel(testItemFixtureB).save();
-      
-      req.params.search = encodeURIComponent(`first_name:${createdModelB.toJSON().first_name}-last_name:${createdModelB.toJSON().last_name}`);
+      req.query = `search[first_name]=${createdModelB.toJSON().first_name}&search[last_name]=${createdModelB.toJSON().last_name}`; 
       
       await list(req, res);
 
-      t.equals(1, res.data.items.length, '1 item should be found');
+      t.equals(1, res.data.items.length, 'item should be found');
       t.equals(testItemFixtureB.first_name, res.data.items[0].first_name, 'should be found');
       
       let helpers = AdapterTestHelpers();
@@ -204,39 +172,37 @@ async function main() {
       req = helpers.req;
       res = helpers.res;
 
-      req.params.sort = encodeURIComponent('first_name:DESC-last_name:DESC');
+      req.query = 'sort[first_name]=DESC&sort[last_name]=DESC';
      
       await list(req, res);
       
       t.equals(testItemFixtureB.first_name, res.data.items[0].first_name, 'should be sorted descending');
-
-    } catch (err) {
-      log.error(err);
-    } finally {
-      t.end(); 
-    }
-  });
-  
-  await tape('Adapter Base scoped', async function(t) {
-    
-    try {
-    
+      
       await clearTable();
-      let {req, res} = AdapterTestHelpers();
+    
+      helpers = AdapterTestHelpers();
+      req = helpers.req;
+      res = helpers.res;
       
       const createdModelA = await new TestItemModel(testItemFixtureA).save();
-      const createdModelB = await new TestItemModel(testItemFixtureB).save();
-      
-      req.params.scope = `parent_id:${createdModelB.toJSON().parent_id}`;
-      
-      await scoped(req, res);
+      await wait(2000); 
+      //const createdModelB = 
+      await new TestItemModel(testItemFixtureB).save();
+      const createdModelAData = createdModelA.toJSON(); 
+      //const createdModelBData = createdModelB.toJSON(); 
 
-      t.equals(1, res.data.length, '1 item should be found');
-      
-      req.params.scope = `parent_id:${createdModelA.toJSON().parent_id}_${createdModelB.toJSON().parent_id}`;
+      const momentDate = new Moment(createdModelAData.updated_at); 
 
-      await scoped(req, res);
-      t.equals(2, res.data.length, '2 item should be found');
+      const updatedAt = momentDate.format(dateFormat);
+      const encodedDate = encodeURIComponent(updatedAt);
+    
+      req.query = `date[updated_at][gt]=${encodedDate}`;
+      
+      await list(req, res);
+
+      t.true(createdModelAData.updated_at < res.data.items[0].updated_at, 
+        'should be updated');
+
 
     } catch (err) {
       log.error(err);
@@ -298,38 +264,6 @@ async function main() {
         }});
 
       t.equal(res.data.docs.length, 1);
-
-    } catch (err) {
-      log.error(err);
-    } finally {
-      t.end(); 
-    }
-  });
-
-  await tape('Adapter Base modified', async function(t) {
-    
-    try {
-      await clearTable();
-    
-      let {req, res} = AdapterTestHelpers();
-      
-      const createdModelA = await new TestItemModel(testItemFixtureA).save();
-      await wait(2000); 
-      //const createdModelB = 
-      await new TestItemModel(testItemFixtureB).save();
-      const createdModelAData = createdModelA.toJSON(); 
-      //const createdModelBData = createdModelB.toJSON(); 
-
-      const momentDate = new Moment(createdModelAData.updated_at); 
-
-      const updatedAt = momentDate.format(dateFormat);
-      const encodedDate = encodeURIComponent(updatedAt);
-     
-      req.params.date = encodedDate;
-      
-      await modified(req, res);
-
-      t.true(createdModelAData.updated_at < res.data[0].updated_at, 'should be updated');
 
     } catch (err) {
       log.error(err);
