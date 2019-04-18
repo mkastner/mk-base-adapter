@@ -5,7 +5,8 @@ module.exports = {
     user     : process.env.DB_TEST_USER,
     password : process.env.DB_TEST_USER_PASSWORD,
     database : 'mk_base_adapter_test',
-    charset  : 'utf8'
+    charset  : 'utf8',
+    preciseTimestamps: true
   },
   debug: false,
   pool: {

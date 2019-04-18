@@ -1,6 +1,6 @@
 {
   "name": "mk-base-adapter",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Basic CRUD adapter logic for express requests",
   "main": "lib/index.js",
   "repository": "https://github.com/mkastner/mk-base-adapter.git",
@@ -11,12 +11,13 @@
     "db:migration": "NODE_ENV=test knex migrate:make --knexfile=test/db/knexfile.js",
     "db:migrate": "NODE_ENV=test knex migrate:latest --knexfile=test/db/knexfile.js",
     "db:rollback": "NODE_ENV=test knex migrate:rollback --knexfile=test/db/knexfile.js",
-    "test": "NODE_ENV=test node test/base-adapter.test.js"
+    "test": "NODE_ENV=test node test/base-adapter.test.js",
+    "test:plugin": "NODE_ENV=test node test/batch-update-plugin.test.js"
   },
   "devDependencies": {
-    "mk-log": "https://github.com/mkastner/mk-adapter-test-helpers.git#v0.0.2",
     "bookshelf": "^0.14.2",
     "knex": "^0.14.6",
+    "mk-log": "https://github.com/mkastner/mk-adapter-test-helpers.git#v0.0.2",
     "mysql": "^2.16.0",
     "qs": "^6.7.0",
     "tape": "^4.9.2"
@@ -24,6 +25,7 @@
   "dependencies": {
     "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.7",
     "moment": "^2.23.0",
+    "moment-timezone": "^0.5.23",
     "pluralize": "^7.0.0"
   }
 }

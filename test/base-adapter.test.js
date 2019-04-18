@@ -1,13 +1,16 @@
 const log = require('mk-log');
 const TestItemModel = require('./db/models/test-item-model');
-const Moment = require('moment');
+const Moment = require('moment-timezone');
+//const Moment = require('moment');
 const dateFormat = 'YYYY-MM-DD HH:mm:ss'; 
+const qs = require('qs');
 const tape = require('tape');
 const {
   create,
-  createMultiple, 
   remove,
+  removeMultiple,
   update,
+  upsertMultiple, 
   read,
   list
 } = require('../lib/index.js')(TestItemModel, {listKey: 'items'});
@@ -74,17 +77,24 @@ async function main() {
     }
   });
   
-  await tape('Adapter Base createMultiple', async function(t) {
+  await tape('Adapter Base upsertMultiple', async function(t) {
     
     try {
       await clearTable();
+      // don't clear: need to check wheter timestamp for
+      // latest record before created works 
       const {req, res} = AdapterTestHelpers();
       req.body = [testItemFixtureA, testItemFixtureB];
 
-      await createMultiple(req, res);
-      const createdModels = res.data;
+      const countBefore =  await TestItemModel.count();
 
-      t.equals(createdModels.length, 2, 'created multiple records');
+      await upsertMultiple(req, res);
+      
+      const countAfter = await TestItemModel.count();
+
+      log.info('res.data', res.data);
+
+      t.equals(countAfter - countBefore, 2, 'created multiple records');
 
     } catch (err) {
       log.error(err);
@@ -102,6 +112,7 @@ async function main() {
       req.params.id = id;
       await remove(req, res);
       const removedUser = await TestItemModel.where({id}).fetch();
+
       t.notOk(removedUser, 'should be removed');
 
     } catch (err) {
@@ -119,8 +130,9 @@ async function main() {
       const idA = createdModelA.id;
       const createdModelB = await new TestItemModel(testItemFixtureA).save();
       const idB = createdModelB.id;
-      req.params.id = `${idA}+${idB}`; 
-      await remove(req, res);
+      //req.params.id = `${idA}+${idB}`; 
+      req.body = [idA, idB]; 
+      await removeMultiple(req, res);
       let remainingUsers = await TestItemModel.where('id', '>=', 0).fetchAll();
 
       t.equals(remainingUsers.toJSON().length, 0, 'should be removed');
@@ -162,7 +174,11 @@ async function main() {
       const createdModelB = await new TestItemModel(testItemFixtureB).save();
       req.query = `search[first_name]=${createdModelB.toJSON().first_name}&search[last_name]=${createdModelB.toJSON().last_name}`; 
       
+      log.info('rea.query', req.query);
+
       await list(req, res);
+
+      log.info('res.data', res.data);
 
       t.equals(1, res.data.items.length, 'item should be found');
       t.equals(testItemFixtureB.first_name, res.data.items[0].first_name, 'should be found');
@@ -172,11 +188,15 @@ async function main() {
       req = helpers.req;
       res = helpers.res;
 
-      req.query = 'sort[first_name]=DESC&sort[last_name]=DESC';
+      
+      req.query = qs.stringify({ order: [{by: 'last_name', direction: 'DESC'}]}, 
+        {encodeValuesOnly: true});
+
+      //'order[0][by]=last_name&order[0][direction]=DESC';
      
       await list(req, res);
-      
-      t.equals(testItemFixtureB.first_name, res.data.items[0].first_name, 'should be sorted descending');
+
+      t.ok(testItemFixtureB.last_name.toString().trim() === res.data.items[0].last_name.toString().trim(), 'should be sorted descending');
       
       await clearTable();
     
@@ -193,16 +213,24 @@ async function main() {
 
       const momentDate = new Moment(createdModelAData.updated_at); 
 
-      const updatedAt = momentDate.format(dateFormat);
+      const updatedAt = Moment.tz(momentDate, 'Europe/Berlin').format(dateFormat);
       const encodedDate = encodeURIComponent(updatedAt);
-    
-      req.query = `date[updated_at][gt]=${encodedDate}`;
+
+      const query = qs.stringify({range: [{
+        field: 'updated_at',
+        val: encodedDate,
+        comp: 'gt',
+      }]}, {encodeValuesOnly: true});
+
+      req.query = query;
+      //req.query = `ate[updated_at][gt]=${encodedDate}`;
       
       await list(req, res);
 
+      log.info('res.data.items', res.data.items);
+
       t.true(createdModelAData.updated_at < res.data.items[0].updated_at, 
         'should be updated');
-
 
     } catch (err) {
       log.error(err);
@@ -263,6 +291,8 @@ async function main() {
           }
         }});
 
+      log.info(res.data.docs);
+
       t.equal(res.data.docs.length, 1);
 
     } catch (err) {
@@ -271,7 +301,6 @@ async function main() {
       t.end(); 
     }
   });
-
 }
 
 main();

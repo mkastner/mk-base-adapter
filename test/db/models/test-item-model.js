@@ -9,5 +9,5 @@ const TestItem = Bookshelf.Model.extend({
 // Bookshelf.model is function of
 // plugin registry
 
-//module.exports = Bookshelf.model('TestItem', TestItem);
+module.exports = Bookshelf.model('TestItem', TestItem);
 module.exports = TestItem;
