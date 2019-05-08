@@ -1,6 +1,6 @@
 {
   "name": "mk-base-adapter",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Basic CRUD adapter logic for express requests",
   "main": "lib/index.js",
   "repository": "https://github.com/mkastner/mk-base-adapter.git",
@@ -11,13 +11,15 @@
     "db:migration": "NODE_ENV=test knex migrate:make --knexfile=test/db/knexfile.js",
     "db:migrate": "NODE_ENV=test knex migrate:latest --knexfile=test/db/knexfile.js",
     "db:rollback": "NODE_ENV=test knex migrate:rollback --knexfile=test/db/knexfile.js",
-    "test": "NODE_ENV=test node test/base-adapter.test.js",
-    "test:plugin": "NODE_ENV=test node test/batch-update-plugin.test.js"
+    "test": "yarn test:adapter && yarn test:plugin",
+    "test:adapter": "NODE_ENV=test node test/base-adapter.test.js",
+    "test:plugin": "yarn test:plugin:batch-update && yarn test:plugin:touch",
+    "test:plugin:batch-update": "NODE_ENV=test node test/batch-update-plugin.test.js",
+    "test:plugin:touch": "NODE_ENV=test node test/touch-plugin.test.js"
   },
   "devDependencies": {
     "bookshelf": "^0.14.2",
     "knex": "^0.14.6",
-    "mk-log": "https://github.com/mkastner/mk-adapter-test-helpers.git#v0.0.2",
     "mysql": "^2.16.0",
     "qs": "^6.7.0",
     "tape": "^4.9.2"

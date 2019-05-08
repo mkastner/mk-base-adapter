@@ -1,5 +1,7 @@
 const log = require('mk-log');
 const TestItemModel = require('./db/models/test-item-model');
+const clearTable = require('./utils/clear-table');
+const wait = require('./utils/wait');
 const Moment = require('moment-timezone');
 //const Moment = require('moment');
 const dateFormat = 'YYYY-MM-DD HH:mm:ss'; 
@@ -12,7 +14,8 @@ const {
   update,
   upsertMultiple, 
   read,
-  list
+  list,
+  touch
 } = require('../lib/index.js')(TestItemModel, {listKey: 'items'});
 
 const AdapterTestHelpers = require('mk-adapter-test-helpers');
@@ -29,29 +32,6 @@ const testItemFixtureB = {
   last_name: 'TestB'
 };
 
-function wait(milliseconds) {
-
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, milliseconds); 
-  });
-
-}
-
-async function clearTable() {
-  try {
-    let result = await TestItemModel.where('id', '>', 0);
-    let count = await result.count();
-    if (count > 0) {
-      await TestItemModel.where('id', '>', 0).destroy();
-    }
-  } catch (err) {
-    log.error(err);
-    return Promise.reject(err); 
-  }
-}
-
 async function main() {
 
   if (!(process.env.NODE_ENV === 'test')) {
@@ -62,7 +42,7 @@ async function main() {
   await tape('Adapter Base create', async function(t) {
     
     try {
-      await clearTable();
+      await clearTable(TestItemModel);
       const {req, res} = AdapterTestHelpers();
       req.body = testItemFixtureA; 
       await create(req, res);
@@ -77,10 +57,39 @@ async function main() {
     }
   });
   
+  await tape('Adapter Base touch', async function(t) {
+    
+    try {
+      await clearTable(TestItemModel);
+     
+      const createdModel = await new TestItemModel(testItemFixtureA).save();
+
+      const initialUpdate = createdModel.updated_at;
+      const id = createdModel.id;
+     
+      await wait(1100);
+      
+      const {req, res} = AdapterTestHelpers();
+
+      req.params.id = id;
+      await touch(req, res);
+
+      const touchedModel = res.data;
+      const touchedUpdate = touchedModel.updated_at;
+
+      t.true(initialUpdate < touchedUpdate, 'model updated_at was touched');
+
+    } catch (err) {
+      log.error(err);
+    } finally {
+      t.end(); 
+    }
+  });
+  
   await tape('Adapter Base upsertMultiple', async function(t) {
     
     try {
-      await clearTable();
+      await clearTable(TestItemModel);
       // don't clear: need to check wheter timestamp for
       // latest record before created works 
       const {req, res} = AdapterTestHelpers();
@@ -92,7 +101,7 @@ async function main() {
       
       const countAfter = await TestItemModel.count();
 
-      log.info('res.data', res.data);
+      log.debug('res.data', res.data);
 
       t.equals(countAfter - countBefore, 2, 'created multiple records');
 
@@ -105,7 +114,7 @@ async function main() {
   
   await tape('Adapter Base remove', async function(t) {
     try {
-      await clearTable();
+      await clearTable(TestItemModel);
       const {req, res} = AdapterTestHelpers();
       const createdModel = await new TestItemModel(testItemFixtureA).save();
       const id = createdModel.id;
@@ -124,7 +133,7 @@ async function main() {
   
   await tape('Adapter Base removeMultiple', async function(t) {
     try {
-      await clearTable();
+      await clearTable(TestItemModel);
       const {req, res} = AdapterTestHelpers();
       const createdModelA = await new TestItemModel(testItemFixtureA).save();
       const idA = createdModelA.id;
@@ -166,7 +175,7 @@ async function main() {
     
     try {
 
-      await clearTable();
+      await clearTable(TestItemModel);
     
       let {req, res} = AdapterTestHelpers();
       
@@ -198,7 +207,7 @@ async function main() {
 
       t.ok(testItemFixtureB.last_name.toString().trim() === res.data.items[0].last_name.toString().trim(), 'should be sorted descending');
       
-      await clearTable();
+      await clearTable(TestItemModel);
     
       helpers = AdapterTestHelpers();
       req = helpers.req;
@@ -243,7 +252,7 @@ async function main() {
     
     try {
    
-      await clearTable();
+      await clearTable(TestItemModel);
     
       let {req, res} = AdapterTestHelpers();
       
@@ -277,7 +286,7 @@ async function main() {
           qb.where({parent_id: 1});
         }
       }});
-      await clearTable();
+      await clearTable(TestItemModel);
       await new TestItemModel(testItemFixtureA).save();
       //const createdModelB = 
       await new TestItemModel(testItemFixtureB).save();

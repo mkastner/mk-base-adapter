@@ -1,5 +1,7 @@
 const log = require('mk-log');
 const TestItemModel = require('./db/models/test-item-model');
+const wait = require('./utils/wait');
+const clearTable = require('./utils/clear-table');
 //const Moment = require('moment-timezone');
 //const Moment = require('moment');
 //const dateFormat = 'YYYY-MM-DD HH:mm:ss'; 
@@ -22,29 +24,6 @@ const testItemFixtureB = {
   last_name: 'TestUpdateLastNameB'
 };
 
-function wait(milliseconds) {
-
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, milliseconds); 
-  });
-
-}
-
-async function clearTable() {
-  try {
-    let result = await TestItemModel.where('id', '>', 0);
-    let count = await result.count();
-    if (count > 0) {
-      await TestItemModel.where('id', '>', 0).destroy();
-    }
-  } catch (err) {
-    log.error(err);
-    return Promise.reject(err); 
-  }
-}
-
 async function main() {
 
   if (!(process.env.NODE_ENV === 'test')) {
@@ -55,7 +34,7 @@ async function main() {
   await tape('Adapter Base create', async function(t) {
     
     try {
-      await clearTable();
+      await clearTable(TestItemModel);
      
       let rawLatestRecord = await TestItemModel.query(qb => {
         qb.orderBy('created_at', 'DESC');
@@ -66,9 +45,8 @@ async function main() {
       //await wait(1000);
       
       const listA = [testItemFixtureA, testItemFixtureB];
-      const result = await TestItemModel.batchUpdate(listA);
+      await TestItemModel.batchUpdate(listA);
 
-      log.info('&&&&&&&&&&&&&& result', result);
    
       // if there are already records find the ones newer
       // than rawLatestRecord
@@ -86,10 +64,9 @@ async function main() {
 
       const createdRecords = rawCreatedRecords.toJSON();
     
-      log.info(createdRecords.length);
+      log.debug(createdRecords.length);
 
       t.equals(createdRecords.length, 2, 'records should be created');
-
 
       rawLatestRecord = await TestItemModel.query(qb => {
         qb.orderBy('created_at', 'DESC');
