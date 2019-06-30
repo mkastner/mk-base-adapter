@@ -1,6 +1,6 @@
 {
   "name": "mk-base-adapter",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Basic CRUD adapter logic for express requests",
   "main": "lib/index.js",
   "repository": "https://github.com/mkastner/mk-base-adapter.git",
@@ -15,14 +15,21 @@
     "test:adapter": "NODE_ENV=test node test/base-adapter.test.js",
     "test:plugin": "yarn test:plugin:batch-update && yarn test:plugin:touch",
     "test:plugin:batch-update": "NODE_ENV=test node test/batch-update-plugin.test.js",
-    "test:plugin:touch": "NODE_ENV=test node test/touch-plugin.test.js"
+    "test:plugin:touch": "NODE_ENV=test node test/touch-plugin.test.js",
+    "test:util": "yarn test test:util:vuex-base-store",
+    "test:util:vuex-base-store": "NODE_ENV=test node test/vuex-base-store.test.js"
   },
   "devDependencies": {
+    "axios": "^0.19.0",
+    "body-parser": "^1.19.0",
     "bookshelf": "^0.14.2",
+    "express": "^4.17.1",
     "knex": "^0.14.6",
     "mysql": "^2.16.0",
     "qs": "^6.7.0",
-    "tape": "^4.9.2"
+    "tape": "^4.9.2",
+    "vue": "^2.6.10",
+    "vuex": "^3.1.1"
   },
   "dependencies": {
     "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.7",
