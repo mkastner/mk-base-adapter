@@ -1,6 +1,6 @@
 {
   "name": "mk-base-adapter",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Basic CRUD adapter logic for express requests",
   "main": "lib/index.js",
   "repository": "https://github.com/mkastner/mk-base-adapter.git",
