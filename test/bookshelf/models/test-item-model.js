@@ -1,4 +1,4 @@
-const Bookshelf = require('../database');
+const Bookshelf = require('../db/database');
 
 const TestItem = Bookshelf.Model.extend({
   tableName: 'test_items',

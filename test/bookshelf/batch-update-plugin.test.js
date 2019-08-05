@@ -1,6 +1,6 @@
 const log = require('mk-log');
-const TestItemModel = require('./db/models/test-item-model');
-const wait = require('./utils/wait');
+const TestItemModel = require('./db-bookshelf/models/test-item-model');
+//const wait = require('./utils/wait');
 const clearTable = require('./utils/clear-table');
 //const Moment = require('moment-timezone');
 //const Moment = require('moment');
@@ -40,7 +40,7 @@ async function main() {
         qb.orderBy('created_at', 'DESC');
         qb.limit(1);
       }).fetch();
-      log.info('rawLatestRecord', rawLatestRecord);
+      //log.info('rawLatestRecord', rawLatestRecord);
       
       //await wait(1000);
       
@@ -83,8 +83,9 @@ async function main() {
         delete createdRecords[i].updated_at;
       }
 
-      const resultB = await TestItemModel.batchUpdate(createdRecords);
-      log.info('resultB', resultB);
+      //const resultB = 
+      await TestItemModel.batchUpdate(createdRecords);
+      //log.info('resultB', resultB);
       //const latestUpdatedRecord = rawLatestRecord.toJSON();
       const rawUpdatedRecords = await TestItemModel.query(qb => {
         qb.where('id', '>', 0);
@@ -92,7 +93,7 @@ async function main() {
      
       const updatedRecords = rawUpdatedRecords.toJSON();
 
-      log.info('updatedRecords', updatedRecords);
+      //log.info('updatedRecords', updatedRecords);
 
       t.equal(updatedRecords.length, 2, 'records should be updated');
 

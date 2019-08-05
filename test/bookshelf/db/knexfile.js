@@ -10,8 +10,8 @@ module.exports = {
   },
   debug: false,
   pool: {
-    min: 1,
-    max: 3
+    min: 0,
+    max: 30 
   },
   migrations: {
     directory: './migrations',

@@ -1,12 +1,15 @@
+const env = process.env.NODE_ENV;
+if (env !== 'test') {
+  throw new Error('tests must be run in test env');
+}
 const tape = require('tape');
 const log = require('mk-log');
-const TestItemModel = require('./db/models/test-item-model');
+const TestItemModel = require('./models/test-item-model');
 const Vue = require('vue');
 const Vuex = require('vuex');
-const Base = require('../lib/utils/vuex-base-store');
+const Base = require('../../lib/utils/vuex-base-store');
 const clearTable = require('./utils/clear-table');
-const checkTestEnv = require('./utils/is-valid-test-env');
-const Server = require('./utils/server'); 
+const Server = require('../utils/server'); 
 const port = 3001;
 Vue.use(Vuex);
 
@@ -19,7 +22,7 @@ const {
   read,
   list,
   //touch
-} = require('../lib/index.js')(TestItemModel, {listKey: 'items'});
+} = require('../../lib/bookshelf-adapter.js')(TestItemModel, {listKey: 'items'});
 
 const initialFirstName = 'NewTestAFirstName';
 const initialLastName = 'NewTestALastName';
@@ -41,8 +44,6 @@ function createStore(hostPort) {
   return store;
 
 }
-
-checkTestEnv();
 
 async function main() {
 

@@ -1,7 +1,7 @@
 const log = require('mk-log');
 const knexConfig = require('./knexfile');
-const batchUpdatePlugin = require('../../lib/bookshelf-plugins/batch-update-plugin');
-const touchPlugin = require('../../lib/bookshelf-plugins/touch-plugin');
+const batchUpdatePlugin = require('../../../lib/bookshelf-plugins/batch-update-plugin');
+const touchPlugin = require('../../../lib/bookshelf-plugins/touch-plugin');
 
 log.info('knexConfig', knexConfig);
 

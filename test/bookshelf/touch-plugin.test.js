@@ -1,7 +1,13 @@
+const env = process.env.NODE_ENV;
+
+if (env !== 'test') {
+  throw new Error('Tests must be run in test env'); 
+}
+
 const log = require('mk-log');
 const clearTable = require('./utils/clear-table');
 const wait = require('./utils/wait');
-const TestItemModel = require('./db/models/test-item-model');
+const TestItemModel = require('./db-bookshelf/models/test-item-model');
 const AdapterTestHelpers = require('mk-adapter-test-helpers');
 //const Moment = require('moment-timezone');
 //const Moment = require('moment');
@@ -10,7 +16,7 @@ const AdapterTestHelpers = require('mk-adapter-test-helpers');
 const tape = require('tape');
 const {
   create,
-} = require('../lib/index.js')(TestItemModel, {listKey: 'items'});
+} = require('../lib/bookshelf-adapter.js')(TestItemModel, {listKey: 'items'});
 
 const testItemFixtureA = {
   created_at: null,
@@ -31,9 +37,6 @@ const testItemFixtureB = {
 
 async function main() {
 
-  if (!(process.env.NODE_ENV === 'test')) {
-    return Promise.reject(new Error(`Tests must be run in NODE_ENV=test but not in env ${process.env.NODE_ENV}`)); 
-  }
 
 
   await tape('Touch Plugin Test', async function(t) {

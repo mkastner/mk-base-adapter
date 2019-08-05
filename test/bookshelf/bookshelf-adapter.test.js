@@ -1,7 +1,7 @@
 const log = require('mk-log');
-const TestItemModel = require('./db/models/test-item-model');
+const TestItemModel = require('./models/test-item-model');
 const clearTable = require('./utils/clear-table');
-const wait = require('./utils/wait');
+const wait = require('../utils/wait');
 const Moment = require('moment-timezone');
 //const Moment = require('moment');
 const dateFormat = 'YYYY-MM-DD HH:mm:ss'; 
@@ -16,7 +16,7 @@ const {
   read,
   list,
   touch
-} = require('../lib/index.js')(TestItemModel, {listKey: 'items'});
+} = require('../../lib/bookshelf-adapter.js')(TestItemModel, {listKey: 'items'});
 
 const AdapterTestHelpers = require('mk-adapter-test-helpers');
 
@@ -38,8 +38,7 @@ async function main() {
     return Promise.reject(new Error(`Tests must be run in NODE_ENV=test but not in env ${process.env.NODE_ENV}`)); 
   }
 
-
-  await tape('Adapter Base create', async function(t) {
+  await tape('Adapter Base create', async (t) => {
     
     try {
       await clearTable(TestItemModel);
@@ -56,17 +55,17 @@ async function main() {
       t.end(); 
     }
   });
-  
-  await tape('Adapter Base touch', async function(t) {
+
+  await tape('Adapter Base touch', async (t) => {
     
     try {
       await clearTable(TestItemModel);
-     
+
       const createdModel = await new TestItemModel(testItemFixtureA).save();
 
-      const initialUpdate = createdModel.updated_at;
+      const initialUpdate = createdModel.toJSON().updated_at;
       const id = createdModel.id;
-     
+    
       await wait(1100);
       
       const {req, res} = AdapterTestHelpers();
@@ -86,7 +85,7 @@ async function main() {
     }
   });
   
-  await tape('Adapter Base upsertMultiple', async function(t) {
+  await tape('Adapter Base upsertMultiple', async (t) => {
     
     try {
       await clearTable(TestItemModel);
@@ -112,7 +111,7 @@ async function main() {
     }
   });
   
-  await tape('Adapter Base remove', async function(t) {
+  await tape('Adapter Base remove', async (t) => {
     try {
       await clearTable(TestItemModel);
       const {req, res} = AdapterTestHelpers();
@@ -131,7 +130,7 @@ async function main() {
     }
   });
   
-  await tape('Adapter Base removeMultiple', async function(t) {
+  await tape('Adapter Base removeMultiple', async (t) => {
     try {
       await clearTable(TestItemModel);
       const {req, res} = AdapterTestHelpers();
@@ -153,7 +152,7 @@ async function main() {
     }
   });
   
-  await tape('Adapter Base read', async function(t) {
+  await tape('Adapter Base read', async (t) => {
     try {
       const {req, res} = AdapterTestHelpers();
       const createdModel = await new TestItemModel(testItemFixtureA).save();
@@ -171,7 +170,7 @@ async function main() {
     }
   });
 
-  await tape('Adapter Base list', async function(t) {
+  await tape('Adapter Base list', async (t) => {
     
     try {
 
@@ -183,11 +182,11 @@ async function main() {
       const createdModelB = await new TestItemModel(testItemFixtureB).save();
       req.query = `search[first_name]=${createdModelB.toJSON().first_name}&search[last_name]=${createdModelB.toJSON().last_name}`; 
       
-      log.info('rea.query', req.query);
+      log.debug('rea.query', req.query);
 
       await list(req, res);
 
-      log.info('res.data', res.data);
+      log.debug('res.data', res.data);
 
       t.equals(1, res.data.items.length, 'item should be found');
       t.equals(testItemFixtureB.first_name, res.data.items[0].first_name, 'should be found');
@@ -213,7 +212,7 @@ async function main() {
       req = helpers.req;
       res = helpers.res;
       
-      const createdModelA = await new TestItemModel(testItemFixtureA).save();
+      const createdModelA = await new TestItemModel({first_name: 'ABC', last_name: 'XYZ'}).save();
       await wait(2000); 
       //const createdModelB = 
       await new TestItemModel(testItemFixtureB).save();
@@ -228,17 +227,15 @@ async function main() {
       const query = qs.stringify({range: [{
         field: 'updated_at',
         val: encodedDate,
-        comp: 'gt',
+        comp: 'lt',
       }]}, {encodeValuesOnly: true});
 
       req.query = query;
-      //req.query = `ate[updated_at][gt]=${encodedDate}`;
+      //req.query = `range[updated_at][gt]=${encodedDate}`;
       
       await list(req, res);
 
-      log.info('res.data.items', res.data.items);
-
-      t.true(createdModelAData.updated_at < res.data.items[0].updated_at, 
+      t.true(createdModelAData.updated_at > res.data.items[0].updated_at, 
         'should be updated');
 
     } catch (err) {
@@ -248,7 +245,7 @@ async function main() {
     }
   });
   
-  await tape('Adapter Base update', async function(t) {
+  await tape('Adapter Base update', async (t) => {
     
     try {
    
@@ -276,12 +273,12 @@ async function main() {
     }
   });
   
-  await tape('Adapter Base hooks', async function(t) {
+  await tape('Adapter Base hooks', async (t) => {
     
     try {
       const {
         list,
-      } = require('../lib/index.js')(TestItemModel, null, { list: { 
+      } = require('../../lib/bookshelf-adapter.js')(TestItemModel, null, { list: { 
         query(qb) {
           qb.where({parent_id: 1});
         }
@@ -300,7 +297,7 @@ async function main() {
           }
         }});
 
-      log.info(res.data.docs);
+      log.debug(res.data.docs);
 
       t.equal(res.data.docs.length, 1);
 
@@ -310,6 +307,7 @@ async function main() {
       t.end(); 
     }
   });
+
 }
 
 main();
