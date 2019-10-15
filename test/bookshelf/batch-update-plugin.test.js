@@ -1,5 +1,5 @@
 const log = require('mk-log');
-const TestItemModel = require('./db-bookshelf/models/test-item-model');
+const TestPersonModel = require('./db-bookshelf/models/test-person-model');
 //const wait = require('./utils/wait');
 const clearTable = require('./utils/clear-table');
 //const Moment = require('moment-timezone');
@@ -34,9 +34,9 @@ async function main() {
   await tape('Adapter Base create', async function(t) {
     
     try {
-      await clearTable(TestItemModel);
+      await clearTable(TestPersonModel);
      
-      let rawLatestRecord = await TestItemModel.query(qb => {
+      let rawLatestRecord = await TestPersonModel.query(qb => {
         qb.orderBy('created_at', 'DESC');
         qb.limit(1);
       }).fetch();
@@ -45,7 +45,7 @@ async function main() {
       //await wait(1000);
       
       const listA = [testItemFixtureA, testItemFixtureB];
-      await TestItemModel.batchUpdate(listA);
+      await TestPersonModel.batchUpdate(listA);
 
    
       // if there are already records find the ones newer
@@ -53,11 +53,11 @@ async function main() {
       let rawCreatedRecords;
       if (rawLatestRecord) {
         const latestRecord = rawLatestRecord.toJSON();
-        rawCreatedRecords = await TestItemModel.query(qb => {
+        rawCreatedRecords = await TestPersonModel.query(qb => {
           qb.where('created_at', '>', latestRecord.created_at);
         }).fetchAll();
       } else {
-        rawCreatedRecords = await TestItemModel.query(qb => {
+        rawCreatedRecords = await TestPersonModel.query(qb => {
           qb.where('id', '>', 0);
         }).fetchAll();
       } 
@@ -68,7 +68,7 @@ async function main() {
 
       t.equals(createdRecords.length, 2, 'records should be created');
 
-      rawLatestRecord = await TestItemModel.query(qb => {
+      rawLatestRecord = await TestPersonModel.query(qb => {
         qb.orderBy('created_at', 'DESC');
         qb.limit(1);
       }).fetch();
@@ -84,10 +84,10 @@ async function main() {
       }
 
       //const resultB = 
-      await TestItemModel.batchUpdate(createdRecords);
+      await TestPersonModel.batchUpdate(createdRecords);
       //log.info('resultB', resultB);
       //const latestUpdatedRecord = rawLatestRecord.toJSON();
-      const rawUpdatedRecords = await TestItemModel.query(qb => {
+      const rawUpdatedRecords = await TestPersonModel.query(qb => {
         qb.where('id', '>', 0);
       }).fetchAll();
      

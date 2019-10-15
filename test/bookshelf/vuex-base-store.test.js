@@ -4,7 +4,7 @@ if (env !== 'test') {
 }
 const tape = require('tape');
 const log = require('mk-log');
-const TestItemModel = require('./models/test-item-model');
+const TestPersonModel = require('./models/test-person-model');
 const Vue = require('vue');
 const Vuex = require('vuex');
 const Base = require('../../lib/utils/vuex-base-store');
@@ -22,7 +22,7 @@ const {
   read,
   list,
   //touch
-} = require('../../lib/bookshelf-adapter.js')(TestItemModel, {listKey: 'items'});
+} = require('../../lib/bookshelf-adapter.js')(TestPersonModel, {listKey: 'items'});
 
 const initialFirstName = 'NewTestAFirstName';
 const initialLastName = 'NewTestALastName';
@@ -50,7 +50,7 @@ async function main() {
   await tape('create initial default item', async (t) => {
     try { 
     
-      await clearTable(TestItemModel);
+      await clearTable(TestPersonModel);
 
       const {app, server} = await Server(port);
 
@@ -73,7 +73,7 @@ async function main() {
  
   await tape('list items', async (t) => {
     try { 
-      await clearTable(TestItemModel);
+      await clearTable(TestPersonModel);
 
       const {app, server} = await Server(port);
 
@@ -100,7 +100,7 @@ async function main() {
   
   await tape('update item', async (t) => {
     try { 
-      await clearTable(TestItemModel);
+      await clearTable(TestPersonModel);
 
       const {app, server} = await Server(port);
 
@@ -142,7 +142,7 @@ async function main() {
   
   await tape('remove item', async (t) => {
     try { 
-      await clearTable(TestItemModel);
+      await clearTable(TestPersonModel);
 
       const {app, server} = await Server(port);
 
@@ -173,7 +173,7 @@ async function main() {
   
   await tape('upsert multiple', async (t) => {
     try { 
-      await clearTable(TestItemModel);
+      await clearTable(TestPersonModel);
 
       const {app, server} = await Server(port);
 

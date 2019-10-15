@@ -7,7 +7,7 @@ if (env !== 'test') {
 const log = require('mk-log');
 const clearTable = require('./utils/clear-table');
 const wait = require('./utils/wait');
-const TestItemModel = require('./db-bookshelf/models/test-item-model');
+const TestPersonModel = require('./db-bookshelf/models/test-person-model');
 const AdapterTestHelpers = require('mk-adapter-test-helpers');
 //const Moment = require('moment-timezone');
 //const Moment = require('moment');
@@ -16,9 +16,9 @@ const AdapterTestHelpers = require('mk-adapter-test-helpers');
 const tape = require('tape');
 const {
   create,
-} = require('../lib/bookshelf-adapter.js')(TestItemModel, {listKey: 'items'});
+} = require('../lib/bookshelf-adapter.js')(TestPersonModel, {listKey: 'items'});
 
-const testItemFixtureA = {
+const testPesonFixtureA = {
   created_at: null,
   parent_id: 0, 
   //updated_at: null,
@@ -26,7 +26,7 @@ const testItemFixtureA = {
   last_name: 'TestUpdateLastNameA'
 };
 
-const testItemFixtureB = {
+const testPesonFixtureB = {
   created_at: null,
   updated_at: null,
   first_name: 'TestUpdateFirstNameB',
@@ -45,9 +45,9 @@ async function main() {
       await clearTable(TestItemModel);
 
       const {req, res} = AdapterTestHelpers();
-      req.body = testItemFixtureA; 
+      req.body = testPesonFixtureA; 
       await create(req, res);
-      req.body = testItemFixtureB; 
+      req.body = testPesonFixtureB; 
       await create(req, res);
       await wait(1100);
 

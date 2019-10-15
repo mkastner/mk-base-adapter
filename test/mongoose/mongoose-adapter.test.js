@@ -4,7 +4,7 @@ if (env !== 'test') {
 }
 
 const log = require('mk-log');
-const TestItemModel = require('./models/test-item-model');
+const TestPersonModel = require('./models/test-person-model');
 const clearTable = require('./utils/clear-table');
 const wait = require('../utils/wait');
 //const Moment = require('moment-timezone');
@@ -22,30 +22,29 @@ const {
   upsertMultiple, 
   read,
   list,
-  touch
-} = require('../../lib/mongoose-adapter.js')(TestItemModel, { listKey: 'items', });
+  touch } = require('../../lib/mongoose-adapter.js')(TestPersonModel, { listKey: 'items' });
 
-const testItemFixtureA = {
+const testPersonFixtureA = {
   firstName: 'TestA',
   lastName: 'TestA'
 };
 
-const testItemFixtureB = {
+const testPersonFixtureB = {
   firstName: 'TestBfirstName',
   lastName: 'TestBLastName'
 };
 
 tape('Mongoose adapter create', async (t) => {
    
-  await clearTable(TestItemModel);
+  await clearTable(TestPersonModel);
 
   try {
-    await clearTable(TestItemModel);
+    await clearTable(TestPersonModel);
     const helperA = AdapterTestHelpers();
     const reqA = helperA.req;
     const resA = helperA.res;
 
-    reqA.body = testItemFixtureA; 
+    reqA.body = testPersonFixtureA; 
     await create(reqA, resA);
     const createdModel = resA.data;
     t.equals(reqA.body.last_name, createdModel.last_name, 'created model with field last_name');
@@ -73,13 +72,13 @@ tape('Mongoose Adapter update', async (t) => {
   
   try {
  
-    await clearTable(TestItemModel);
+    await clearTable(TestPersonModel);
   
     const helperA = AdapterTestHelpers();
     const reqA = helperA.req;
     const resA = helperA.res;
 
-    const createdModelData = await new TestItemModel(testItemFixtureA).save();
+    const createdModelData = await new TestPersonModel(testPersonFixtureA).save();
     
     reqA.params.id = createdModelData.id;
     reqA.body = {lastName: 'TestZ'};
@@ -98,11 +97,11 @@ tape('Mongoose Adapter list', async (t) => {
   
   try {
  
-    await clearTable(TestItemModel);
+    await clearTable(TestPersonModel);
   
     let {req, res} = AdapterTestHelpers();
-    await new TestItemModel(testItemFixtureA).save();
-    const createdModelB = await new TestItemModel(testItemFixtureB).save();
+    await new TestPersonModel(testPersonFixtureA).save();
+    const createdModelB = await new TestPersonModel(testPersonFixtureB).save();
 
     req.query = `search[firstName]=${createdModelB.firstName}&search[lastName]=${createdModelB.lastName}`; 
 
@@ -120,13 +119,13 @@ tape('Mongoose Adapter upsertMultiple', async (t) => {
   
   try {
  
-    await clearTable(TestItemModel);
+    await clearTable(TestPersonModel);
   
     let {req, res} = AdapterTestHelpers();
-    const createdModelA = await new TestItemModel(testItemFixtureA).save();
-    //const createdModelA = await new TestItemModel(testItemFixtureB).save();
+    const createdModelA = await new TestPersonModel(testPersonFixtureA).save();
+    //const createdModelA = await new TestPersonModel(testPersonFixtureB).save();
 
-    req.body = [createdModelA, testItemFixtureB];
+    req.body = [createdModelA, testPersonFixtureB];
     await upsertMultiple(req, res);
     t.equals(res.data.length,  2, 'one should be created');
  
@@ -145,8 +144,8 @@ tape('Mongoose Adapter upsertMultiple', async (t) => {
 tape('Mongoose Adapter remove', async (t) => {
   
   try {
-    await clearTable(TestItemModel);
-    const createdModelA = await new TestItemModel(testItemFixtureA).save();
+    await clearTable(TestPersonModel);
+    const createdModelA = await new TestPersonModel(testPersonFixtureA).save();
     let {req, res} = AdapterTestHelpers();
     req.params.id = createdModelA._id;
     await remove(req, res);
@@ -164,10 +163,10 @@ tape('Mongoose Adapter remove', async (t) => {
 tape('Mongoose Adapter removeMany', async (t) => {
   
   try {
-    await clearTable(TestItemModel);
-    const createdModelA = await new TestItemModel(testItemFixtureA).save();
-    await new TestItemModel(testItemFixtureA).save();
-    await new TestItemModel(testItemFixtureB).save();
+    await clearTable(TestPersonModel);
+    const createdModelA = await new TestPersonModel(testPersonFixtureA).save();
+    await new TestPersonModel(testPersonFixtureA).save();
+    await new TestPersonModel(testPersonFixtureB).save();
     let {req, res} = AdapterTestHelpers();
     req.body.ids = [createdModelA._id];
     await removeMultiple(req, res);
@@ -184,8 +183,8 @@ tape('Mongoose Adapter removeMany', async (t) => {
 tape('Mongoose Adapter read', async (t) => {
   
   try {
-    await clearTable(TestItemModel);
-    const createdModelA = await new TestItemModel(testItemFixtureA).save();
+    await clearTable(TestPersonModel);
+    const createdModelA = await new TestPersonModel(testPersonFixtureA).save();
     let {req, res} = AdapterTestHelpers();
     req.params.id = createdModelA._id;
     await read(req, res);
@@ -204,8 +203,8 @@ tape('Mongoose Adapter read', async (t) => {
 tape('Mongoose Adapter touch', async (t) => {
   
   try {
-    await clearTable(TestItemModel);
-    const createdModelA = await new TestItemModel(testItemFixtureA).save();
+    await clearTable(TestPersonModel);
+    const createdModelA = await new TestPersonModel(testPersonFixtureA).save();
     let {req, res} = AdapterTestHelpers();
     req.params.id = createdModelA._id;
     await wait(1100); 

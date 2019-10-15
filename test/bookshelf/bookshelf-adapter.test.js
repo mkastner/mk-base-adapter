@@ -1,5 +1,5 @@
 const log = require('mk-log');
-const TestItemModel = require('./models/test-item-model');
+const TestPersonModel = require('./models/test-person-model');
 const clearTable = require('./utils/clear-table');
 const wait = require('../utils/wait');
 const Moment = require('moment-timezone');
@@ -16,17 +16,17 @@ const {
   read,
   list,
   touch
-} = require('../../lib/bookshelf-adapter.js')(TestItemModel, {listKey: 'items'});
+} = require('../../lib/bookshelf-adapter.js')(TestPersonModel, {listKey: 'items'});
 
 const AdapterTestHelpers = require('mk-adapter-test-helpers');
 
-const testItemFixtureA = {
+const testPersonFixtureA = {
   parent_id: 1, 
   first_name: 'TestA',
   last_name: 'TestA'
 };
 
-const testItemFixtureB = {
+const testPersonFixtureB = {
   parent_id: 2, 
   first_name: 'TestB',
   last_name: 'TestB'
@@ -41,9 +41,9 @@ async function main() {
   await tape('Adapter Base create', async (t) => {
     
     try {
-      await clearTable(TestItemModel);
+      await clearTable(TestPersonModel);
       const {req, res} = AdapterTestHelpers();
-      req.body = testItemFixtureA; 
+      req.body = testPersonFixtureA; 
       await create(req, res);
       const createdModel = res.data;
 
@@ -59,9 +59,9 @@ async function main() {
   await tape('Adapter Base touch', async (t) => {
     
     try {
-      await clearTable(TestItemModel);
+      await clearTable(TestPersonModel);
 
-      const createdModel = await new TestItemModel(testItemFixtureA).save();
+      const createdModel = await new TestPersonModel(testPersonFixtureA).save();
 
       const initialUpdate = createdModel.toJSON().updated_at;
       const id = createdModel.id;
@@ -88,17 +88,17 @@ async function main() {
   await tape('Adapter Base upsertMultiple', async (t) => {
     
     try {
-      await clearTable(TestItemModel);
+      await clearTable(TestPersonModel);
       // don't clear: need to check wheter timestamp for
       // latest record before created works 
       const {req, res} = AdapterTestHelpers();
-      req.body = [testItemFixtureA, testItemFixtureB];
+      req.body = [testPersonFixtureA, testPersonFixtureB];
 
-      const countBefore =  await TestItemModel.count();
+      const countBefore =  await TestPersonModel.count();
 
       await upsertMultiple(req, res);
       
-      const countAfter = await TestItemModel.count();
+      const countAfter = await TestPersonModel.count();
 
       log.debug('res.data', res.data);
 
@@ -113,13 +113,13 @@ async function main() {
   
   await tape('Adapter Base remove', async (t) => {
     try {
-      await clearTable(TestItemModel);
+      await clearTable(TestPersonModel);
       const {req, res} = AdapterTestHelpers();
-      const createdModel = await new TestItemModel(testItemFixtureA).save();
+      const createdModel = await new TestPersonModel(testPersonFixtureA).save();
       const id = createdModel.id;
       req.params.id = id;
       await remove(req, res);
-      const removedUser = await TestItemModel.where({id}).fetch();
+      const removedUser = await TestPersonModel.where({id}).fetch();
 
       t.notOk(removedUser, 'should be removed');
 
@@ -132,16 +132,16 @@ async function main() {
   
   await tape('Adapter Base removeMultiple', async (t) => {
     try {
-      await clearTable(TestItemModel);
+      await clearTable(TestPersonModel);
       const {req, res} = AdapterTestHelpers();
-      const createdModelA = await new TestItemModel(testItemFixtureA).save();
+      const createdModelA = await new TestPersonModel(testPersonFixtureA).save();
       const idA = createdModelA.id;
-      const createdModelB = await new TestItemModel(testItemFixtureA).save();
+      const createdModelB = await new TestPersonModel(testPersonFixtureA).save();
       const idB = createdModelB.id;
       //req.params.id = `${idA}+${idB}`; 
       req.body = [idA, idB]; 
       await removeMultiple(req, res);
-      let remainingUsers = await TestItemModel.where('id', '>=', 0).fetchAll();
+      let remainingUsers = await TestPersonModel.where('id', '>=', 0).fetchAll();
 
       t.equals(remainingUsers.toJSON().length, 0, 'should be removed');
 
@@ -155,11 +155,11 @@ async function main() {
   await tape('Adapter Base read', async (t) => {
     try {
       const {req, res} = AdapterTestHelpers();
-      const createdModel = await new TestItemModel(testItemFixtureA).save();
+      const createdModel = await new TestPersonModel(testPersonFixtureA).save();
       const id = createdModel.id;
       req.params.id = id;
       await read(req, res);
-      let readUser = await TestItemModel.where({id}).fetch();
+      let readUser = await TestPersonModel.where({id}).fetch();
 
       t.equals(id, readUser.id, 'should be read');
 
@@ -174,12 +174,12 @@ async function main() {
     
     try {
 
-      await clearTable(TestItemModel);
+      await clearTable(TestPersonModel);
     
       let {req, res} = AdapterTestHelpers();
       
-      await new TestItemModel(testItemFixtureA).save();
-      const createdModelB = await new TestItemModel(testItemFixtureB).save();
+      await new TestPersonModel(testPersonFixtureA).save();
+      const createdModelB = await new TestPersonModel(testPersonFixtureB).save();
       req.query = `search[first_name]=${createdModelB.toJSON().first_name}&search[last_name]=${createdModelB.toJSON().last_name}`; 
       
       log.debug('rea.query', req.query);
@@ -189,7 +189,7 @@ async function main() {
       log.debug('res.data', res.data);
 
       t.equals(1, res.data.items.length, 'item should be found');
-      t.equals(testItemFixtureB.first_name, res.data.items[0].first_name, 'should be found');
+      t.equals(testPersonFixtureB.first_name, res.data.items[0].first_name, 'should be found');
       
       let helpers = AdapterTestHelpers();
 
@@ -204,18 +204,18 @@ async function main() {
      
       await list(req, res);
 
-      t.ok(testItemFixtureB.last_name.toString().trim() === res.data.items[0].last_name.toString().trim(), 'should be sorted descending');
+      t.ok(testPersonFixtureB.last_name.toString().trim() === res.data.items[0].last_name.toString().trim(), 'should be sorted descending');
       
-      await clearTable(TestItemModel);
+      await clearTable(TestPersonModel);
     
       helpers = AdapterTestHelpers();
       req = helpers.req;
       res = helpers.res;
       
-      const createdModelA = await new TestItemModel({first_name: 'ABC', last_name: 'XYZ'}).save();
+      const createdModelA = await new TestPersonModel({first_name: 'ABC', last_name: 'XYZ'}).save();
       await wait(2000); 
       //const createdModelB = 
-      await new TestItemModel(testItemFixtureB).save();
+      await new TestPersonModel(testPersonFixtureB).save();
       const createdModelAData = createdModelA.toJSON(); 
       //const createdModelBData = createdModelB.toJSON(); 
 
@@ -249,11 +249,11 @@ async function main() {
     
     try {
    
-      await clearTable(TestItemModel);
+      await clearTable(TestPersonModel);
     
       let {req, res} = AdapterTestHelpers();
       
-      const createdModelA = await new TestItemModel(testItemFixtureA).save();
+      const createdModelA = await new TestPersonModel(testPersonFixtureA).save();
       const createdModelData = createdModelA.toJSON(); 
 
       //log.info('createdModelData', createdModelData);
@@ -278,15 +278,15 @@ async function main() {
     try {
       const {
         list,
-      } = require('../../lib/bookshelf-adapter.js')(TestItemModel, null, { list: { 
+      } = require('../../lib/bookshelf-adapter.js')(TestPersonModel, null, { list: { 
         query(qb) {
           qb.where({parent_id: 1});
         }
       }});
-      await clearTable(TestItemModel);
-      await new TestItemModel(testItemFixtureA).save();
+      await clearTable(TestPersonModel);
+      await new TestPersonModel(testPersonFixtureA).save();
       //const createdModelB = 
-      await new TestItemModel(testItemFixtureB).save();
+      await new TestPersonModel(testPersonFixtureB).save();
       
       let {req, res} = AdapterTestHelpers();
 
