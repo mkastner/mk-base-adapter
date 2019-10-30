@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate-v2');
 const Schema = mongoose.Schema;
 const schema = new Schema({
-  persons: [{ type: Schema.Types.ObjectId, ref: 'Person' }],
-  title: { type: String, required: [true, 'Title muß angegeben werden'] },
+  person: { type: Schema.Types.ObjectId, ref: 'Person' },
+  make: { type: String, enum: ['BMW', 'Mercedes', 'VW', 'Audi'] },
 }, {timestamps: true});
 schema.plugin(mongoosePaginate);
-module.exports = mongoose.model('Job', schema);
+module.exports = mongoose.model('Car', schema);

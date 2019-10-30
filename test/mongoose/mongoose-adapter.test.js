@@ -5,6 +5,7 @@ if (env !== 'test') {
 
 const log = require('mk-log');
 const TestPersonModel = require('./models/test-person-model');
+const TestCarModel = require('./models/test-car-model');
 const clearTable = require('./utils/clear-table');
 const wait = require('../utils/wait');
 //const Moment = require('moment-timezone');
@@ -32,6 +33,18 @@ const testPersonFixtureA = {
 const testPersonFixtureB = {
   firstName: 'TestBfirstName',
   lastName: 'TestBLastName'
+};
+
+const testCarFixtureA = {
+  title: 'VW'
+};
+
+const testCarFixtureB = {
+  title: 'Audi'
+};
+
+const testCarFixtureC = {
+  title: 'Mercedes'
 };
 
 tape('Mongoose adapter create', async (t) => {
@@ -78,7 +91,8 @@ tape('Mongoose Adapter update', async (t) => {
     const reqA = helperA.req;
     const resA = helperA.res;
 
-    const createdModelData = await new TestPersonModel(testPersonFixtureA).save();
+    const createdModelData = 
+      await new TestPersonModel(testPersonFixtureA).save();
     
     reqA.params.id = createdModelData.id;
     reqA.body = {lastName: 'TestZ'};
@@ -93,7 +107,7 @@ tape('Mongoose Adapter update', async (t) => {
   }
 });
 
-tape('Mongoose Adapter list', async (t) => {
+tape('Mongoose Adapter list search', async (t) => {
   
   try {
  
@@ -108,6 +122,55 @@ tape('Mongoose Adapter list', async (t) => {
     await list(req, res);
 
     t.ok(res.data.items.length >= 1, 'should have docs');
+  } catch (err) {
+    log.error(err);
+  } finally {
+    t.end(); 
+  }
+});
+
+tape('Mongoose Adapter list in', async (t) => {
+  
+  try {
+ 
+    await clearTable(TestPersonModel);
+    await clearTable(TestCarModel);
+  
+    const {req, res} = AdapterTestHelpers();
+    const createdCarModelA = await new TestCarModel(testCarFixtureA).save();
+    const createdCarModelB = await new TestCarModel(testCarFixtureB).save();
+    const createdCarModelC = await new TestCarModel(testCarFixtureC).save();
+   
+    testPersonFixtureA.cars = [createdCarModelA];
+    testPersonFixtureA.cars.push(createdCarModelB);
+    
+    testPersonFixtureB.cars = [createdCarModelB];
+    testPersonFixtureB.cars.push(createdCarModelA);
+    testPersonFixtureB.cars.push(createdCarModelC);
+
+    //const createdPersonModelA = await new TestPersonModel(testPersonFixtureA).save();
+    //const createdPersonModelB = await new TestPersonModel(testPersonFixtureB).save();
+
+    req.query = `in[cars]=${createdCarModelA._id}&in[cars]=${createdCarModelB._id}`; 
+
+    await list(req, res);
+
+    log.info(res.data.items);
+
+    t.ok(res.data.items.length === 2, 'should have 2 docs');
+
+    req.query = `in[cars]=${createdCarModelA._id}`; 
+
+    await list(req, res);
+    
+    t.ok(res.data.items.length === 2, 'should have exactly 2 doc');
+
+    req.query = `in[cars]=${createdCarModelC._id}`; 
+
+    await list(req, res);
+
+    t.ok(res.data.items.length === 1, 'should have exactly 1 doc');
+
   } catch (err) {
     log.error(err);
   } finally {
