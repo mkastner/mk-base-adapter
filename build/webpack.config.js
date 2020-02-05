@@ -20,7 +20,7 @@ module.exports = {
   //devtool: 'eval-source-map',
   output: {
     filename: '[name].js',
-    libraryTarget: 'umd'
+    libraryTarget: 'umd',
   },
   module: {
     noParse: /es6-promise\.js$/, // avoid webpack shimming process

@@ -58,13 +58,8 @@ module.exports = function VuexBaseStore (
         // if id is a number convert it to integer
         id = parseInt(id);
       }
-      console.log('id    ', id);
-      console.log('idName', idName);
       const foundItem =  state.list.find(t => t[idName] === id); 
-
-      console.log('foundItem', foundItem);
-
-      return state.list.find(t => t[idName] === id); 
+      return foundItem; 
     },
     orderBy(state) {
       return (by) => {

@@ -9,8 +9,8 @@ const charset = knexConfig.connection.charset;
 
 async function main() {
 
-  let dbRoot = process.env.DB_TEST_ROOT;
-  let dbRootPassword = process.env.DB_TEST_ROOT_PASSWORD;
+  let dbRoot = process.env.DB_TEST_USER;
+  let dbRootPassword = process.env.DB_TEST_USER_PASSWORD;
 
   try {
 

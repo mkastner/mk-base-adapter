@@ -86,7 +86,8 @@ tape('Mongoose Adapter update', async (t) => {
   try {
  
     await clearTable(TestPersonModel);
-  
+ 
+    log.info('after update clearTable');
     const helperA = AdapterTestHelpers();
     const reqA = helperA.req;
     const resA = helperA.res;
@@ -94,11 +95,17 @@ tape('Mongoose Adapter update', async (t) => {
     const createdModelData = 
       await new TestPersonModel(testPersonFixtureA).save();
     
+    log.info('after update createdModelData');
+    
     reqA.params.id = createdModelData.id;
     reqA.body = {lastName: 'TestZ'};
+    
+    log.info('before update');
 
     await update(reqA, resA);
-    
+   
+    log.info('after update');
+
     t.equals(reqA.body.last_name,  resA.data.last_name, 'should be updated');
   } catch (err) {
     log.error(err);
@@ -148,14 +155,14 @@ tape('Mongoose Adapter list in', async (t) => {
     testPersonFixtureB.cars.push(createdCarModelA);
     testPersonFixtureB.cars.push(createdCarModelC);
 
-    //const createdPersonModelA = await new TestPersonModel(testPersonFixtureA).save();
-    //const createdPersonModelB = await new TestPersonModel(testPersonFixtureB).save();
+    await new TestPersonModel(testPersonFixtureA).save();
+    await new TestPersonModel(testPersonFixtureB).save();
 
     req.query = `in[cars]=${createdCarModelA._id}&in[cars]=${createdCarModelB._id}`; 
 
     await list(req, res);
 
-    log.info(res.data.items);
+    log.debug(res.data.items);
 
     t.ok(res.data.items.length === 2, 'should have 2 docs');
 
