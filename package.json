@@ -35,7 +35,7 @@
     "bookshelf": "^0.14.2",
     "eslint": "^6.5.1",
     "express": "^4.17.1",
-    "knex": "^0.14.6",
+    "knex": "^0.19.5",
     "mk-adapter-test-helpers": "https://github.com/mkastner/mk-adapter-test-helpers.git#v0.0.2",
     "mongo-connect": "^0.0.6",
     "mongoose": "^5.6.4",
