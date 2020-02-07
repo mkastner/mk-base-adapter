@@ -89,7 +89,7 @@ async function main() {
     
     try {
       await clearTable(TestPersonModel);
-      // don't clear: need to check wheter timestamp for
+      // don't clear: need to check whether timestamp for
       // latest record before created works 
       const {req, res} = AdapterTestHelpers();
       req.body = [testPersonFixtureA, testPersonFixtureB];
@@ -119,7 +119,7 @@ async function main() {
       const id = createdModel.id;
       req.params.id = id;
       await remove(req, res);
-      const removedUser = await TestPersonModel.where({id}).fetch();
+      const removedUser = await TestPersonModel.where({id}).fetch({require: false});
 
       t.notOk(removedUser, 'should be removed');
 
@@ -227,7 +227,7 @@ async function main() {
       const query = qs.stringify({range: [{
         field: 'updated_at',
         val: encodedDate,
-        comp: 'lt',
+        comp: 'gt',
       }]}, {encodeValuesOnly: true});
 
       req.query = query;
@@ -235,7 +235,7 @@ async function main() {
       
       await list(req, res);
 
-      t.true(createdModelAData.updated_at > res.data.items[0].updated_at, 
+      t.true(createdModelAData.updated_at < res.data.items[0].updated_at, 
         'should be updated');
 
     } catch (err) {

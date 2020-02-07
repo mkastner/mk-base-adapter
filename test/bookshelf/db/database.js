@@ -10,10 +10,11 @@ const bookshelf = require('bookshelf')(knex);
 
 bookshelf.plugin(batchUpdatePlugin);
 bookshelf.plugin(touchPlugin);
-bookshelf.plugin('registry');
+
+//bookshelf.plugin('registry');
 //bookshelf.plugin('virtuals');
 //bookshelf.plugin('visibility');
 //bookshelf.plugin('bookshelf-scopes');
-bookshelf.plugin('pagination');
+//bookshelf.plugin('pagination');
 
 module.exports = bookshelf;

@@ -1,6 +1,6 @@
 {
   "name": "mk-base-adapter",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Basic CRUD adapter logic for express requests",
   "main": "lib/bookshelf-adapter.js",
   "repository": "https://github.com/mkastner/mk-base-adapter.git",
@@ -32,10 +32,11 @@
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
     "body-parser": "^1.19.0",
-    "bookshelf": "^0.14.2",
+    "bookshelf": "^1.1.0",
+    "css-loader": "^3.4.2",
     "eslint": "^6.5.1",
     "express": "^4.17.1",
-    "knex": "^0.14.6",
+    "knex": "^0.20.8",
     "mk-adapter-test-helpers": "https://github.com/mkastner/mk-adapter-test-helpers.git#v0.0.2",
     "mongo-connect": "^0.0.6",
     "mongoose": "^5.6.4",
@@ -45,13 +46,13 @@
     "rimraf": "^3.0.0",
     "tape": "^4.9.2",
     "vue-eslint-parser": "^6.0.4",
-    "vue-loader": "^15.7.2",
+    "vue-loader": "^15.8.3",
     "vuex": "^3.1.1",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"
   },
   "dependencies": {
-    "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.7",
+    "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.9",
     "moment": "^2.23.0",
     "moment-timezone": "^0.5.23",
     "pluralize": "^7.0.0"

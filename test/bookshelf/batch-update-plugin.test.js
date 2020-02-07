@@ -39,7 +39,7 @@ async function main() {
       let rawLatestRecord = await TestPersonModel.query(qb => {
         qb.orderBy('created_at', 'DESC');
         qb.limit(1);
-      }).fetch();
+      }).fetch({require: false});
       //log.info('rawLatestRecord', rawLatestRecord);
       
       //await wait(1000);
@@ -55,11 +55,11 @@ async function main() {
         const latestRecord = rawLatestRecord.toJSON();
         rawCreatedRecords = await TestPersonModel.query(qb => {
           qb.where('created_at', '>', latestRecord.created_at);
-        }).fetchAll();
+        }).fetchAll({require: false});
       } else {
         rawCreatedRecords = await TestPersonModel.query(qb => {
           qb.where('id', '>', 0);
-        }).fetchAll();
+        }).fetchAll({require: false});
       } 
 
       const createdRecords = rawCreatedRecords.toJSON();

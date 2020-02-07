@@ -55,12 +55,14 @@ async function main() {
       const initialRecord = await TestPersonModel.query(qb => {
         qb.orderBy('created_at', 'DESC');
         qb.limit(1);
-      }).fetch();
+      }).fetch({require: false});
+     
       await initialRecord.touch(); 
+
       const touchedRecordA = await TestPersonModel.query(qb => {
         qb.orderBy('created_at', 'DESC');
         qb.limit(1);
-      }).fetch();
+      }).fetch({require: false});
      
       t.true(initialRecord.attributes.updated_at < touchedRecordA.attributes.updated_at, 'increased updated_at through record object');
 
@@ -69,7 +71,7 @@ async function main() {
       const touchedRecordB = await TestPersonModel.query(qb => {
         qb.orderBy('created_at', 'DESC');
         qb.limit(1);
-      }).fetch();
+      }).fetch({require: false});
       
       t.true(touchedRecordA.attributes.updated_at < touchedRecordB.attributes.updated_at, 'increased updated_at through new model');
      
