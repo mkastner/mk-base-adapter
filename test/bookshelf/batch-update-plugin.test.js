@@ -1,5 +1,5 @@
 const log = require('mk-log');
-const TestPersonModel = require('./db-bookshelf/models/test-person-model');
+const TestPersonModel = require('./models/test-person-model');
 //const wait = require('./utils/wait');
 const clearTable = require('./utils/clear-table');
 //const Moment = require('moment-timezone');

@@ -6,8 +6,8 @@ if (env !== 'test') {
 
 const log = require('mk-log');
 const clearTable = require('./utils/clear-table');
-const wait = require('./utils/wait');
-const TestPersonModel = require('./db-bookshelf/models/test-person-model');
+const wait = require('../utils/wait');
+const TestPersonModel = require('./models/test-person-model');
 const AdapterTestHelpers = require('mk-adapter-test-helpers');
 //const Moment = require('moment-timezone');
 //const Moment = require('moment');
@@ -16,7 +16,7 @@ const AdapterTestHelpers = require('mk-adapter-test-helpers');
 const tape = require('tape');
 const {
   create,
-} = require('../lib/bookshelf-adapter.js')(TestPersonModel, {listKey: 'items'});
+} = require('../../lib/bookshelf-adapter.js')(TestPersonModel, {listKey: 'items'});
 
 const testPesonFixtureA = {
   created_at: null,
@@ -42,7 +42,7 @@ async function main() {
   await tape('Touch Plugin Test', async function(t) {
     
     try {
-      await clearTable(TestItemModel);
+      await clearTable(TestPersonModel);
 
       const {req, res} = AdapterTestHelpers();
       req.body = testPesonFixtureA; 
@@ -52,12 +52,12 @@ async function main() {
       await wait(1100);
 
 
-      const initialRecord = await TestItemModel.query(qb => {
+      const initialRecord = await TestPersonModel.query(qb => {
         qb.orderBy('created_at', 'DESC');
         qb.limit(1);
       }).fetch();
       await initialRecord.touch(); 
-      const touchedRecordA = await TestItemModel.query(qb => {
+      const touchedRecordA = await TestPersonModel.query(qb => {
         qb.orderBy('created_at', 'DESC');
         qb.limit(1);
       }).fetch();
@@ -65,8 +65,8 @@ async function main() {
       t.true(initialRecord.attributes.updated_at < touchedRecordA.attributes.updated_at, 'increased updated_at through record object');
 
       await wait(1100);
-      await new TestItemModel({id: initialRecord.attributes.id}).touch(); 
-      const touchedRecordB = await TestItemModel.query(qb => {
+      await new TestPersonModel({id: initialRecord.attributes.id}).touch(); 
+      const touchedRecordB = await TestPersonModel.query(qb => {
         qb.orderBy('created_at', 'DESC');
         qb.limit(1);
       }).fetch();
