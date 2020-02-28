@@ -37,11 +37,10 @@ const testPesonFixtureB = {
 
 async function main() {
 
-
-
-  await tape('Touch Plugin Test', async function(t) {
+  tape('Touch Plugin Test', async function(t) {
     
     try {
+
       await clearTable(TestPersonModel);
 
       const {req, res} = AdapterTestHelpers();
@@ -74,8 +73,6 @@ async function main() {
       }).fetch({require: false});
       
       t.true(touchedRecordA.attributes.updated_at < touchedRecordB.attributes.updated_at, 'increased updated_at through new model');
-     
-
     } catch (err) {
       log.error(err);
     } finally {
@@ -83,7 +80,10 @@ async function main() {
     }
   });
   
-
+  tape('exiting', (t) => {
+    t.end();
+    process.exit(0);
+  });
 }
 
 main();

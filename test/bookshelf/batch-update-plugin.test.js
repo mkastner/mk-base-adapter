@@ -31,9 +31,10 @@ async function main() {
   }
 
 
-  await tape('Adapter Base create', async function(t) {
+  tape('Adapter Base create', async (t) => {
     
     try {
+
       await clearTable(TestPersonModel);
      
       let rawLatestRecord = await TestPersonModel.query(qb => {
@@ -74,30 +75,20 @@ async function main() {
       }).fetch();
 
 
-      //await wait(100);
-
-      //const listB = [testItemFixtureA, testItemFixtureB];
-
       for (let i = 0, l = createdRecords.length; i < l; i++) {
         delete createdRecords[i].created_at;
         delete createdRecords[i].updated_at;
       }
 
-      //const resultB = 
       await TestPersonModel.batchUpdate(createdRecords);
-      //log.info('resultB', resultB);
-      //const latestUpdatedRecord = rawLatestRecord.toJSON();
+      
       const rawUpdatedRecords = await TestPersonModel.query(qb => {
         qb.where('id', '>', 0);
       }).fetchAll();
      
       const updatedRecords = rawUpdatedRecords.toJSON();
 
-      //log.info('updatedRecords', updatedRecords);
-
       t.equal(updatedRecords.length, 2, 'records should be updated');
-
-
     } catch (err) {
       log.error(err);
     } finally {
@@ -105,7 +96,10 @@ async function main() {
     }
   });
   
-
+  tape('exiting', (t) => {
+    t.end(); 
+    process.exit(0);
+  });
 }
 
 main();

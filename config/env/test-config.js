@@ -1,3 +1,4 @@
 module.exports = {
-  logLevel: 'info'
+  logLevel: 'info',
+  assetsRootDir: 'public'
 };

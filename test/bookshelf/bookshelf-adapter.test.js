@@ -170,7 +170,7 @@ async function main() {
     }
   });
 
-  await tape('Adapter Base list', async (t) => {
+  tape('Adapter Base list search and sort', async (t) => {
     
     try {
 
@@ -205,38 +205,6 @@ async function main() {
       await list(req, res);
 
       t.ok(testPersonFixtureB.last_name.toString().trim() === res.data.items[0].last_name.toString().trim(), 'should be sorted descending');
-      
-      await clearTable(TestPersonModel);
-    
-      helpers = AdapterTestHelpers();
-      req = helpers.req;
-      res = helpers.res;
-      
-      const createdModelA = await new TestPersonModel({first_name: 'ABC', last_name: 'XYZ'}).save();
-      await wait(2000); 
-      //const createdModelB = 
-      await new TestPersonModel(testPersonFixtureB).save();
-      const createdModelAData = createdModelA.toJSON(); 
-      //const createdModelBData = createdModelB.toJSON(); 
-
-      const momentDate = new Moment(createdModelAData.updated_at); 
-
-      const updatedAt = Moment.tz(momentDate, 'Europe/Berlin').format(dateFormat);
-      const encodedDate = encodeURIComponent(updatedAt);
-
-      const query = qs.stringify({range: [{
-        field: 'updated_at',
-        val: encodedDate,
-        comp: 'gt',
-      }]}, {encodeValuesOnly: true});
-
-      req.query = query;
-      //req.query = `range[updated_at][gt]=${encodedDate}`;
-      
-      await list(req, res);
-
-      t.true(createdModelAData.updated_at < res.data.items[0].updated_at, 
-        'should be updated');
 
     } catch (err) {
       log.error(err);
@@ -245,7 +213,72 @@ async function main() {
     }
   });
   
-  await tape('Adapter Base update', async (t) => {
+  tape('Adapter Base list comparators', async (t) => {
+    
+    try {
+
+      await clearTable(TestPersonModel);
+    
+      const precisionDate = new Date();
+      
+      const createdModel = await new TestPersonModel(testPersonFixtureA).save();
+      const createdModelData = createdModel.toJSON();
+
+      await wait(1001); 
+     
+      log.info('precisionDate:', precisionDate);
+      log.info('createdModel :', createdModelData.updated_at);
+
+      const momentDate = new Moment(precisionDate); 
+      const updatedAt = Moment.tz(momentDate, 'Europe/Berlin').format(dateFormat);
+     
+
+      const encodedDate = encodeURIComponent(updatedAt);
+      log.info('encodedDate', encodedDate);
+
+      const queryGt = qs.stringify({range: [{
+        field: 'updated_at',
+        val: encodedDate,
+        comp: 'gt',
+      }]}, {encodeValuesOnly: true});
+      
+      const {req, res} = AdapterTestHelpers();
+
+      req.query = queryGt;
+      
+      await list(req, res);
+
+      for (let i = 0, l = res.data.items.length; i < l; i++) {
+        log.info(`last_name ${i}:`, res.data.items[i].last_name);
+        log.info(`date      ${i}:`, res.data.items[i].updated_at);
+      }
+
+      t.true(momentDate < res.data.items[0].updated_at, 
+        'newer/gt date should be found');
+      
+      const queryLt = qs.stringify({range: [{
+        field: 'updated_at',
+        val: encodedDate,
+        comp: 'lt',
+      }]}, {encodeValuesOnly: true});
+      
+      req.query = queryLt;
+      
+      await list(req, res);
+
+      log.info(res.data.items);
+
+      t.notOk(res.data.items.length, 'older/lt date should not be found');
+
+    } catch (err) {
+      log.error(err);
+    } finally {
+      t.end(); 
+    }
+  });
+ 
+
+  tape('Adapter Base update', async (t) => {
     
     try {
    
@@ -307,7 +340,11 @@ async function main() {
       t.end(); 
     }
   });
-
+  
+  tape('exiting', (t) => {
+    t.end(); 
+    process.exit(0);
+  });
 }
 
 main();

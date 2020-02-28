@@ -1,5 +1,6 @@
 const knexConfig = require('./knexfile');
 
+const log = require('mk-log'); 
 const client = knexConfig.client;
 const host = knexConfig.connection.host;
 const database = knexConfig.connection.database;
@@ -7,24 +8,22 @@ const password = knexConfig.connection.password;
 const user = knexConfig.connection.user;
 const charset = knexConfig.connection.charset;
 
-async function main() {
 
-  let dbRoot = process.env.DB_TEST_USER;
-  let dbRootPassword = process.env.DB_TEST_USER_PASSWORD;
+async function main() {
 
   try {
 
-    let knex = await require('knex')({
+    const knex = await require('knex')({
       client, 
       connection: { 
-        user: dbRoot, 
-        password: dbRootPassword, 
+        user, 
+        password, 
         charset, 
         host
       }
     });
      
-    console.log(`creating database ${database}`); 
+    log.info(`creating database ${database}`); 
 
     let createScript = `CREATE DATABASE ${database} CHARACTER SET ${charset} COLLATE utf8_unicode_ci;`; 
 
@@ -39,8 +38,8 @@ async function main() {
 
     knex.destroy();
 
-    knex = require('knex')(knexConfig);
-    knex.destroy();
+    const knexReloaded = require('knex')(knexConfig);
+    knexReloaded.destroy();
   } catch (err) {
     console.error(err); 
   }

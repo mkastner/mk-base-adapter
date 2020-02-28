@@ -1,9 +1,12 @@
+const EnvVars = require('mk-env-vars');
+const envVars = EnvVars({deploy: 'TEST'});
+
 module.exports = {
   client: 'mysql',
   connection: {
-    host     : '10.66.66.16',
-    user     : process.env.DB_TEST_USER,
-    password : process.env.DB_TEST_USER_PASSWORD,
+    host     : envVars('MYSQLHOST'),
+    user     : envVars('DBUSER'),
+    password : envVars('DBPASSWORD'),
     database : 'mk_base_adapter_test',
     charset  : 'utf8',
     preciseTimestamps: true
