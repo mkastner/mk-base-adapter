@@ -5,3 +5,4 @@
 *.swo
 *.swp
 node_modules
+test/assets/work/**/*
