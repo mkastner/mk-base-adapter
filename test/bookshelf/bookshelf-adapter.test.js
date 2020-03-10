@@ -297,6 +297,8 @@ async function main() {
       await update(req, res);
       
       t.equals(req.body.last_name,  res.data.last_name, 'should be updated');
+      t.equals(testPersonFixtureA.first_name,  
+        res.data.first_name, 'should not change other fields');
       
 
     } catch (err) {
