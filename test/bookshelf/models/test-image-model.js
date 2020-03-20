@@ -1,7 +1,5 @@
 const Bookshelf = require('../db/database');
 
-
-
 const TestImage = Bookshelf.Model.extend({
   tableName: 'images',
   debug: true,

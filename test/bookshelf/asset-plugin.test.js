@@ -30,7 +30,7 @@ async function main() {
     log.error(err);
   }
 
-  tape('Adapter Image record  with asset', async function(t) {
+  tape('Adapter Image record create with asset', async function(t) {
     
     try {
 
@@ -69,11 +69,52 @@ async function main() {
     }
 
   });
+  
+  tape('Adapter Image record delete with asset', async function(t) {
+    
+    try {
+
+      await clearTable(TestImageModel);
+      const testImage = new TestImageModel(testImageFixtureA);
+
+      const saveResultRaw = await testImage.save();
+
+      const saveResult = saveResultRaw.toJSON();
+
+      const assetsRootPath = path.resolve(__dirname, '../../public/assets');
+   
+      const statCreated = 
+        await gracefulStat(assetsRootPath, 
+          `${saveResult.id}`, 'original', saveResult.asset_file_name);
+      
+      t.ok(statCreated, 'asset files created');
+
+      const rawDestroyModel = await TestImageModel.where({id: saveResult.id}).fetch();
+     
+      const destroyModel = rawDestroyModel.toJSON();
+      
+      await rawDestroyModel.destroy(); 
+
+      const deletedStatPath = path.join(assetsRootPath, `${destroyModel.id}`);
+
+      const statDeleted = 
+        await gracefulStat(deletedStatPath);
+
+      t.notOk(statDeleted, 'asset files deleted');
+
+    } catch (err) {
+      log.error(err);
+    } finally {
+      t.end(); 
+    }
+
+  });
 
   tape('exit', (t) => {
     t.end(); 
     process.exit(0); 
   }); 
+
 
 }
 

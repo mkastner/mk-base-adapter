@@ -58,7 +58,7 @@
   },
   "dependencies": {
     "js-yaml": "^3.13.1",
-    "mk-image-converter": "https://github.com/mkastner/mk-image-converter.git#v0.0.7",
+    "mk-image-converter": "https://github.com/mkastner/mk-image-converter.git#v0.0.8",
     "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.9",
     "moment": "^2.23.0",
     "moment-timezone": "^0.5.23",
