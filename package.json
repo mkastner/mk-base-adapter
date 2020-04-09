@@ -1,6 +1,6 @@
 {
   "name": "mk-base-adapter",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "description": "Basic CRUD adapter logic for express requests",
   "main": "lib/bookshelf-adapter.js",
   "repository": "https://github.com/mkastner/mk-base-adapter.git",
@@ -58,8 +58,8 @@
   },
   "dependencies": {
     "js-yaml": "^3.13.1",
-    "mk-image-converter": "https://github.com/mkastner/mk-image-converter.git#v0.0.8",
-    "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.9",
+    "mk-image-converter": "https://github.com/mkastner/mk-image-converter.git#v0.0.9",
+    "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.10",
     "moment": "^2.23.0",
     "moment-timezone": "^0.5.23",
     "pluralize": "^7.0.0"

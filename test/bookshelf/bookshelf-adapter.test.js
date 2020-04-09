@@ -206,6 +206,16 @@ async function main() {
 
       t.ok(testPersonFixtureB.last_name.toString().trim() === res.data.items[0].last_name.toString().trim(), 'should be sorted descending');
 
+      // TODO: IN needs testing
+      
+      const stringifiedQuery =  qs.stringify({ in: { id: [2] } }, 
+        {encodeValuesOnly: true});
+
+      log.info('query in', stringifiedQuery);
+
+      await list(req, res);
+
+
     } catch (err) {
       log.error(err);
     } finally {
