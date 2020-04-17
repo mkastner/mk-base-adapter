@@ -3373,9 +3373,9 @@ mixin-deep@^1.2.0:
   version "0.0.2"
   resolved "https://github.com/mkastner/mk-graceful-stat.git#015561351e181f2f6b80a45e01f750ee0dcf3543"
 
-"mk-image-converter@https://github.com/mkastner/mk-image-converter.git#v0.0.9":
-  version "0.0.9"
-  resolved "https://github.com/mkastner/mk-image-converter.git#dc74396cf274e117e0420505392dad60c062b56f"
+"mk-image-converter@https://github.com/mkastner/mk-image-converter.git#v0.0.11":
+  version "0.0.11"
+  resolved "https://github.com/mkastner/mk-image-converter.git#e2150c557adafa35a2a5eec03af57dfaf151c1f2"
   dependencies:
     glob "^7.1.6"
     image-size "^0.8.3"
