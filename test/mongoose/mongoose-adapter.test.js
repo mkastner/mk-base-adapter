@@ -170,13 +170,13 @@ tape('Mongoose Adapter list in', async (t) => {
 
     await list(req, res);
     
-    t.ok(res.data.items.length === 2, 'should have exactly 2 doc');
+    t.equal(res.data.items.length, 2, 'should have exactly 2 doc');
 
     req.query = `in[cars]=${createdCarModelC._id}`; 
 
     await list(req, res);
-
-    t.ok(res.data.items.length === 1, 'should have exactly 1 doc');
+    
+    t.equal(res.data.items.length, 1, 'should have exactly 1 doc');
 
   } catch (err) {
     log.error(err);

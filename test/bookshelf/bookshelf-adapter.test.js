@@ -181,12 +181,8 @@ async function main() {
       await new TestPersonModel(testPersonFixtureA).save();
       const createdModelB = await new TestPersonModel(testPersonFixtureB).save();
       req.query = `search[first_name]=${createdModelB.toJSON().first_name}&search[last_name]=${createdModelB.toJSON().last_name}`; 
-      
-      log.debug('rea.query', req.query);
 
       await list(req, res);
-
-      log.debug('res.data', res.data);
 
       t.equals(1, res.data.items.length, 'item should be found');
       t.equals(testPersonFixtureB.first_name, res.data.items[0].first_name, 'should be found');
