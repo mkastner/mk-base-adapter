@@ -1,6 +1,6 @@
 {
   "name": "mk-base-adapter",
-  "version": "1.2.14",
+  "version": "1.2.15",
   "description": "Basic CRUD adapter logic for express requests",
   "main": "lib/bookshelf-adapter.js",
   "repository": "https://github.com/mkastner/mk-base-adapter.git",
@@ -55,13 +55,13 @@
     "vue-eslint-parser": "^6.0.4",
     "vue-loader": "^15.8.3",
     "vuex": "^3.1.1",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
   },
   "dependencies": {
     "js-yaml": "^3.13.1",
     "mk-image-converter": "https://github.com/mkastner/mk-image-converter.git#v0.0.11",
-    "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.10",
+    "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.11",
     "moment": "^2.23.0",
     "moment-timezone": "^0.5.23",
     "pluralize": "^7.0.0"

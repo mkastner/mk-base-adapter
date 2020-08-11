@@ -114,6 +114,10 @@ const axios = __webpack_require__(4);
 module.exports = function VuexBaseStore(endpointUrl, options, hookOptions) {
   let listKey = 'docs';
   let idName = 'id';
+  let copyPrefix = '';
+  let copyPostfix = '';
+  let copyInclude = [];
+  let copyExclude = [];
 
   if (options) {
     if (options.listKey) {
@@ -122,6 +126,22 @@ module.exports = function VuexBaseStore(endpointUrl, options, hookOptions) {
 
     if (options.idName) {
       idName = options.idName;
+    }
+
+    if (options.copyPrefix) {
+      copyPrefix = options.copyPrefix;
+    }
+
+    if (options.copyPostfix) {
+      copyPostfix = options.copyPostfix;
+    }
+
+    if (options.copyInclude) {
+      copyInclude = options.copyInclude;
+    }
+
+    if (options.copyExclude) {
+      copyExclude = options.copyExclude;
     }
   }
 
@@ -239,6 +259,31 @@ module.exports = function VuexBaseStore(endpointUrl, options, hookOptions) {
         if (result.data.error) {
           throw new Error(result.data.error);
         }
+      });
+    },
+
+    copy({
+      commit
+    }, id) {
+      if (!id) {
+        throw new Error('id missing');
+      }
+
+      const url = `${endpointUrl}/copy/${id}`;
+      const body = {
+        include: copyInclude,
+        exclude: copyExclude,
+        prefix: copyPrefix,
+        postfix: copyPostfix
+      };
+      return axios.post(url, body).then(res => {
+        if (res.data.error) {
+          return console.error(res.data.error);
+        }
+
+        commit('ADD', res.data);
+      }).catch(err => {
+        console.error(err);
       });
     },
 
@@ -536,8 +581,8 @@ module.exports = function VuexBaseStore(endpointUrl, options, hookOptions) {
       }
     },
 
-    ADD(state, article) {
-      state.list.push(article);
+    ADD(state, item) {
+      state.list.push(item);
     },
 
     PATCH(state, {
