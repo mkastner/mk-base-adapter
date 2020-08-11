@@ -9,6 +9,10 @@ module.exports = function VuexBaseStore (
 
   let listKey = 'docs';
   let idName = 'id';
+  let copyPrefix = '';
+  let copyPostfix = '';
+  let copyInclude = [];
+  let copyExclude = [];
 
   if (options) {
     if (options.listKey) {
@@ -16,6 +20,18 @@ module.exports = function VuexBaseStore (
     }
     if (options.idName) {
       idName = options.idName;
+    }
+    if (options.copyPrefix) {
+      copyPrefix = options.copyPrefix;
+    }
+    if (options.copyPostfix) {
+      copyPostfix = options.copyPostfix;
+    }
+    if (options.copyInclude) {
+      copyInclude = options.copyInclude;
+    }
+    if (options.copyExclude) {
+      copyExclude = options.copyExclude;
     }
   }
 
@@ -98,6 +114,27 @@ module.exports = function VuexBaseStore (
         }
       });
     }, 
+    copy({ commit }, id) {
+      if (!id) {
+        throw new Error('id missing');
+      } 
+      const url = `${endpointUrl}/${id}`; 
+      
+      const body = {
+        include: copyInclude,
+        exclude: copyExclude,
+        prefix:  copyPrefix,
+        postfix: copyPostfix
+      };
+      
+      return axios.post(url, body).then( (res) => {
+        // TODO
+        console.log('res.data', res.data); 
+      }).catch((err) => {
+        console.error(err);
+      }); 
+
+    },
     delete({ commit}, id) {
       if (!id) {
         throw new Error('id missing');

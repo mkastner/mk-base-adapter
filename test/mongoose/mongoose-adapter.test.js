@@ -128,6 +128,7 @@ tape('Mongoose Adapter copy', async (t) => {
 
     req.params.id = id;
     req.body = {
+      fixOn: 'lastName',
       include: ['lastName', 'firstName' ],
     }; 
 
@@ -136,7 +137,7 @@ tape('Mongoose Adapter copy', async (t) => {
     log.info(res.data);
 
     t.notEqual(id, res.data._id, 'should have created a copy with differnt id');
-    t.equal(createdModel.lastName, res.data.lastName, 'should have created a copy');
+    t.equal(createdModel.firstName, res.data.firstName, 'should have created a copy');
 
 
   } catch (err) {
