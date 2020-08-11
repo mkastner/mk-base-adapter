@@ -118,7 +118,7 @@ module.exports = function VuexBaseStore (
       if (!id) {
         throw new Error('id missing');
       } 
-      const url = `${endpointUrl}/${id}`; 
+      const url = `${endpointUrl}/copy/${id}`; 
       
       const body = {
         include: copyInclude,
@@ -128,8 +128,10 @@ module.exports = function VuexBaseStore (
       };
       
       return axios.post(url, body).then( (res) => {
-        // TODO
-        console.log('res.data', res.data); 
+        if (res.data.error) {
+          return console.error(res.data.error);
+        } 
+        commit('ADD', res.data); 
       }).catch((err) => {
         console.error(err);
       }); 
@@ -340,8 +342,8 @@ module.exports = function VuexBaseStore (
         Vue.set(article, name, value); 
       } 
     },
-    ADD(state, article) {
-      state.list.push(article);
+    ADD(state, item) {
+      state.list.push(item);
     },
     PATCH(state, {id, fields}) {
       if (!fields) {
