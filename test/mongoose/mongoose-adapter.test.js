@@ -21,6 +21,7 @@ const {
   removeMultiple,
   update,
   upsertMultiple, 
+  copy,
   read,
   list,
   touch } = require('../../lib/mongoose-adapter.js')(TestPersonModel, { listKey: 'items' });
@@ -95,18 +96,49 @@ tape('Mongoose Adapter update', async (t) => {
     const createdModelData = 
       await new TestPersonModel(testPersonFixtureA).save();
     
-    log.info('after update createdModelData');
+    log.debug('after update createdModelData');
     
     reqA.params.id = createdModelData.id;
     reqA.body = {lastName: 'TestZ'};
     
-    log.info('before update');
+    log.debug('before update');
 
     await update(reqA, resA);
    
-    log.info('after update');
+    log.debug('after update');
 
     t.equals(reqA.body.last_name,  resA.data.last_name, 'should be updated');
+  } catch (err) {
+    log.error(err);
+  } finally {
+    t.end(); 
+  }
+});
+
+tape('Mongoose Adapter copy', async (t) => {
+  
+  try {
+ 
+    await clearTable(TestPersonModel);
+  
+    const createdModel = await new TestPersonModel(testPersonFixtureA).save();
+    const id = createdModel._id;
+    
+    let {req, res} = AdapterTestHelpers();
+
+    req.params.id = id;
+    req.body = {
+      include: ['lastName', 'firstName' ],
+    }; 
+
+    await copy(req, res);
+
+    log.info(res.data);
+
+    t.notEqual(id, res.data._id, 'should have created a copy with differnt id');
+    t.equal(createdModel.lastName, res.data.lastName, 'should have created a copy');
+
+
   } catch (err) {
     log.error(err);
   } finally {
