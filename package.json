@@ -1,6 +1,6 @@
 {
   "name": "mk-base-adapter",
-  "version": "1.2.15",
+  "version": "1.2.16",
   "description": "Basic CRUD adapter logic for express requests",
   "main": "lib/bookshelf-adapter.js",
   "repository": "https://github.com/mkastner/mk-base-adapter.git",
@@ -40,7 +40,7 @@
     "eslint": "^6.5.1",
     "express": "^4.17.1",
     "knex": "^0.20.8",
-    "mk-adapter-test-helpers": "https://github.com/mkastner/mk-adapter-test-helpers.git#v0.0.5",
+    "mk-adapter-test-helpers": "https://github.com/mkastner/mk-adapter-test-helpers.git#v0.0.6",
     "mk-deconstruct-base64": "https://github.com/mkastner/mk-deconstruct-base64.git#v0.0.1",
     "mk-env-vars": "https://github.com/mkastner/mk-env-vars.git#v0.0.4",
     "mk-graceful-stat": "https://github.com/mkastner/mk-graceful-stat.git#v0.0.2",

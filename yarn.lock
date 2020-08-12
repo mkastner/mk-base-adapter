@@ -3486,9 +3486,9 @@ mixin-deep@^1.2.0:
     for-in "^1.0.2"
     is-extendable "^1.0.1"
 
-"mk-adapter-test-helpers@https://github.com/mkastner/mk-adapter-test-helpers.git#v0.0.5":
-  version "0.0.5"
-  resolved "https://github.com/mkastner/mk-adapter-test-helpers.git#3917d67993cbb5c2226002614663890daceb3014"
+"mk-adapter-test-helpers@https://github.com/mkastner/mk-adapter-test-helpers.git#v0.0.6":
+  version "0.0.6"
+  resolved "https://github.com/mkastner/mk-adapter-test-helpers.git#8e8635f9b57e2beddc239b112a413c955eaab410"
 
 "mk-deconstruct-base64@https://github.com/mkastner/mk-deconstruct-base64.git#v0.0.1":
   version "0.0.1"

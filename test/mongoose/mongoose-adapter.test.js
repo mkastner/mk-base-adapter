@@ -4,6 +4,7 @@ if (env !== 'test') {
 }
 
 const log = require('mk-log');
+const qs = require('qs');
 const TestPersonModel = require('./models/test-person-model');
 const TestCarModel = require('./models/test-car-model');
 const clearTable = require('./utils/clear-table');
@@ -217,6 +218,66 @@ tape('Mongoose Adapter list in', async (t) => {
     t.end(); 
   }
 });
+
+tape('Mongoose Adapter list range', async (t) => {
+  
+  try {
+ 
+    await clearTable(TestPersonModel);
+    await clearTable(TestCarModel);
+  
+
+    await new TestPersonModel(testPersonFixtureA).save();
+    await new TestPersonModel(testPersonFixtureB).save();
+
+    await AdapterTestHelpers(async(req, res) => { 
+      try { 
+        log.info('req', req);
+        log.info('res', res);
+
+        const queryString = qs.stringify({range: [{
+          field: 'createdAt',
+          comp: 'lt',
+          val: new Date().toISOString()
+        }]}, {encodeValuesOnly: true});
+        req.query = queryString; 
+
+        await list(req, res);
+
+        log.debug(res.data.items);
+
+        t.equals(res.data.items.length, 2, 'should have 2 docs');
+      } catch (err) {
+        log.error(err);
+      }
+    });
+
+    AdapterTestHelpers(async(req, res) => { 
+      const queryString = qs.stringify({range: [{
+        field: 'createdAt',
+        comp: 'gt',
+        val: new Date().toISOString()
+      }]}, {encodeValuesOnly: true});
+      req.query = queryString; 
+
+      await list(req, res);
+
+      log.debug(res.data.items);
+
+      t.equals(res.data.items.length, 0, 'should have 0 docs');
+    });
+
+
+
+    
+
+  } catch (err) {
+    log.error(err);
+  } finally {
+    t.end(); 
+  }
+});
+
 
 tape('Mongoose Adapter upsertMultiple', async (t) => {
   
