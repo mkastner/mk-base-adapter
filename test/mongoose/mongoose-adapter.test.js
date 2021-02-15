@@ -4,6 +4,7 @@ if (env !== 'test') {
 }
 
 const log = require('mk-log');
+const qs = require('qs');
 const TestPersonModel = require('./models/test-person-model');
 const TestCarModel = require('./models/test-car-model');
 const clearTable = require('./utils/clear-table');
@@ -21,6 +22,7 @@ const {
   removeMultiple,
   update,
   upsertMultiple, 
+  copy,
   read,
   list,
   touch } = require('../../lib/mongoose-adapter.js')(TestPersonModel, { listKey: 'items' });
@@ -95,18 +97,50 @@ tape('Mongoose Adapter update', async (t) => {
     const createdModelData = 
       await new TestPersonModel(testPersonFixtureA).save();
     
-    log.info('after update createdModelData');
+    log.debug('after update createdModelData');
     
     reqA.params.id = createdModelData.id;
     reqA.body = {lastName: 'TestZ'};
     
-    log.info('before update');
+    log.debug('before update');
 
     await update(reqA, resA);
    
-    log.info('after update');
+    log.debug('after update');
 
     t.equals(reqA.body.last_name,  resA.data.last_name, 'should be updated');
+  } catch (err) {
+    log.error(err);
+  } finally {
+    t.end(); 
+  }
+});
+
+tape('Mongoose Adapter copy', async (t) => {
+  
+  try {
+ 
+    await clearTable(TestPersonModel);
+  
+    const createdModel = await new TestPersonModel(testPersonFixtureA).save();
+    const id = createdModel._id;
+    
+    let {req, res} = AdapterTestHelpers();
+
+    req.params.id = id;
+    req.body = {
+      fixOn: 'lastName',
+      include: ['lastName', 'firstName' ],
+    }; 
+
+    await copy(req, res);
+
+    log.info(res.data);
+
+    t.notEqual(id, res.data._id, 'should have created a copy with differnt id');
+    t.equal(createdModel.firstName, res.data.firstName, 'should have created a copy');
+
+
   } catch (err) {
     log.error(err);
   } finally {
@@ -184,6 +218,66 @@ tape('Mongoose Adapter list in', async (t) => {
     t.end(); 
   }
 });
+
+tape('Mongoose Adapter list range', async (t) => {
+  
+  try {
+ 
+    await clearTable(TestPersonModel);
+    await clearTable(TestCarModel);
+  
+
+    await new TestPersonModel(testPersonFixtureA).save();
+    await new TestPersonModel(testPersonFixtureB).save();
+
+    await AdapterTestHelpers(async(req, res) => { 
+      try { 
+        log.info('req', req);
+        log.info('res', res);
+
+        const queryString = qs.stringify({range: [{
+          field: 'createdAt',
+          comp: 'lt',
+          val: new Date().toISOString()
+        }]}, {encodeValuesOnly: true});
+        req.query = queryString; 
+
+        await list(req, res);
+
+        log.debug(res.data.items);
+
+        t.equals(res.data.items.length, 2, 'should have 2 docs');
+      } catch (err) {
+        log.error(err);
+      }
+    });
+
+    AdapterTestHelpers(async(req, res) => { 
+      const queryString = qs.stringify({range: [{
+        field: 'createdAt',
+        comp: 'gt',
+        val: new Date().toISOString()
+      }]}, {encodeValuesOnly: true});
+      req.query = queryString; 
+
+      await list(req, res);
+
+      log.debug(res.data.items);
+
+      t.equals(res.data.items.length, 0, 'should have 0 docs');
+    });
+
+
+
+    
+
+  } catch (err) {
+    log.error(err);
+  } finally {
+    t.end(); 
+  }
+});
+
 
 tape('Mongoose Adapter upsertMultiple', async (t) => {
   
