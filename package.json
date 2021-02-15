@@ -28,7 +28,6 @@
   "devDependencies": {
     "axios": "^0.19.2",
     "babel-eslint": "^10.0.3",
-    "babel-loader": "^8.0.6",
     "body-parser": "^1.19.0",
     "bookshelf": "^1.1.0",
     "bookshelf-virtuals-plugin": "^0.1.1",
@@ -36,7 +35,7 @@
     "express": "^4.17.1",
     "knex": "^0.20.8",
     "mk-adapter-test-helpers": "https://github.com/mkastner/mk-adapter-test-helpers.git#v0.0.5",
-    "mk-deconstruct-base64": "https://github.com/mkastner/mk-deconstruct-base64.git#v0.0.1",
+    "mk-deconstruct-base64": "https://github.com/mkastner/mk-deconstruct-base64.git#v0.0.3",
     "mk-env-vars": "https://github.com/mkastner/mk-env-vars.git#v0.0.4",
     "mk-graceful-stat": "https://github.com/mkastner/mk-graceful-stat.git#v0.0.2",
     "mongo-connect": "^0.0.6",
