@@ -222,9 +222,10 @@ async function main() {
 
 
       server.close();
-      t.end();
     } catch (err) {
       log.error(err);
+    } finally {
+      t.end();
     }
   });
 }
