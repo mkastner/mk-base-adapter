@@ -1,6 +1,6 @@
 //const path = require('path');
 //const assetsRootDir = require('../../../config/env/test-config').assetsRootDir;
-const knexConfig = require('./knexfile');
+const knexConfig = require('../../../knexfile');
 const knex = require('knex')(knexConfig);
 const bookshelf = require('bookshelf')(knex);
 const log = require('mk-log');

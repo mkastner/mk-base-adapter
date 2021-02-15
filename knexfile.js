@@ -1,3 +1,5 @@
+// knexfile.js
+// must be in root of project
 const EnvVars = require('mk-env-vars');
 const envVars = EnvVars({deploy: 'TEST'});
 
@@ -17,7 +19,7 @@ module.exports = {
     max: 30 
   },
   migrations: {
-    directory: '../migrations',
+    directory: './test/bookshelf/migrations',
     tableName: 'knex_migrations'
   }
 };
