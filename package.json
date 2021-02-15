@@ -1,6 +1,6 @@
 {
   "name": "mk-base-adapter",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Basic CRUD adapter logic for express requests",
   "main": "lib/bookshelf-adapter.js",
   "repository": "https://github.com/mkastner/mk-base-adapter.git",
