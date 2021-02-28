@@ -10,112 +10,133 @@ const path = require('path');
 
 isValidTestEnv();
 
+//key: there must be two files for each key 
+//mimeType expected result mime type
+const fileTypes = {
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  svg: 'image/svg+xml',
+  pdf: 'application/pdf' 
+};
+
+async function prepareFixtures() {
+
+  const fixtures = { };
+
+  for (let key in fileTypes) {
+    const base64Data = 
+      await fs.readFile(
+        path.join(__dirname, '..', 'assets',`example-${key}.base64`),
+        'utf8' );
+    
+    //log.info('base64Data', base64Data);
+
+    fixtures[key] = {
+      name: `TestUpdateLastName for ${key}`,
+      asset_base64: base64Data,
+      asset_file_name: `example.${key}`
+    }; 
+  } 
+  return fixtures;
+}
+
+
 async function main() {
 
-  let base64PNGData;
-  let testImageFixtureA;
-
-  try {
-
-    base64PNGData = await fs.readFile(
-      path.join(__dirname, '..', 'assets','example-png.base64'), 'utf8' );
-
-    testImageFixtureA = {
-      name: 'TestUpdateLastNameA',
-      asset_file_name: 'example.png', 
-      asset_base64: base64PNGData,
-
-    };
-  } catch (err) {
-    log.error(err);
-  }
-
-  tape('Adapter Image record create with asset', async function(t) {
-    
+  tape('Adapter File Type records create with asset', async function(t) {
     try {
-
       await clearTable(TestImageModel);
-      const testImage = new TestImageModel(testImageFixtureA);
-      const saveResultRaw = await testImage.save();
-     
+      const fixtures = await prepareFixtures(); 
 
-      const saveResult = saveResultRaw.toJSON();
+      for (let key in fileTypes) {
+        const testFixture = fixtures[key]; 
 
-      t.equal(testImageFixtureA.asset_file_name, saveResult.asset_file_name);
-      t.ok(saveResult.asset_file_size, 'should have asset_file_size');
-      t.ok(saveResult.asset_updated_at, 'should have asset_updated_at');
-      t.ok(saveResult.file_hash, 'should have file_hash');
-      t.equal(saveResult.asset_content_type, 'image/png', 
-        'should be mime/content_type image/png');
+        const testMedia = new TestImageModel(testFixture);
+        const saveResultRaw = await testMedia.save();
+        const saveResult = saveResultRaw.toJSON();
+       
+        //log.info('saveResult', saveResult);
 
-      // now load record again from database to
-      // check whether dimensions were set in 'saved' event
-      // Rationale: dimensions can only be read when the files were
-      // saved in their final destination, which includes the record id
-      // in the path.
+        t.equal(testFixture.asset_file_name, saveResult.asset_file_name);
+        t.ok(saveResult.asset_file_size, 'should have asset_file_size');
+        t.ok(saveResult.asset_updated_at, 'should have asset_updated_at');
+        t.ok(saveResult.file_hash, 'should have file_hash');
 
-      const rawFoundResult = await TestImageModel.where({id: saveResult.id}).fetch();
-      const foundResult = rawFoundResult.toJSON();
+        t.equal(saveResult.asset_content_type, fileTypes[key], 
+          `should be mime type "${fileTypes[key]}" for "${key}"`); 
+        
+        const rawFoundResult = await TestImageModel.where({id: saveResult.id}).fetch();
+        const foundResult = rawFoundResult.toJSON();
 
-      const jsonDimensions = yaml.load(foundResult.dimensions);
- 
-      t.ok(jsonDimensions.thumbnail.w, 'width  for dimension thumbnail');
-      t.ok(jsonDimensions.thumbnail.h, 'height for dimension thumbnail');
+        //log.info(foundResult);
 
-    } catch (err) {
-      log.error(err);
-    } finally {
-      t.end(); 
-    }
-
-  });
-  
-  tape('Adapter Image record delete with asset', async function(t) {
-    
-    try {
-
-      await clearTable(TestImageModel);
-      const testImage = new TestImageModel(testImageFixtureA);
-
-      const saveResultRaw = await testImage.save();
-
-      const saveResult = saveResultRaw.toJSON();
-
-      const assetsRootPath = path.resolve(__dirname, '../../public/assets');
+        const jsonDimensions = yaml.load(foundResult.dimensions);
    
-      const statCreated = 
-        await gracefulStat(assetsRootPath, 
-          `${saveResult.id}`, 'original', saveResult.asset_file_name);
-      
-      t.ok(statCreated, 'asset files created');
-
-      const rawDestroyModel = await TestImageModel.where({id: saveResult.id}).fetch();
-     
-      const destroyModel = rawDestroyModel.toJSON();
-      
-      await rawDestroyModel.destroy(); 
-
-      const deletedStatPath = path.join(assetsRootPath, `${destroyModel.id}`);
-
-      const statDeleted = 
-        await gracefulStat(deletedStatPath);
-
-      t.notOk(statDeleted, 'asset files deleted');
-
+        t.ok(jsonDimensions.thumbnail.w, 'width  for dimension thumbnail');
+        t.ok(jsonDimensions.thumbnail.h, 'height for dimension thumbnail');
+      }
     } catch (err) {
       log.error(err);
     } finally {
       t.end(); 
     }
+  });
 
+  tape('Adapter File Type records delete with asset', async function(t) {
+  
+    try {
+
+      await clearTable(TestImageModel);
+
+      const fixtures = await prepareFixtures();
+
+      for (let key in fileTypes) {
+        //const fileType = fileTypes[key];
+        const testFixture = fixtures[key]; 
+        // const testMediaData = new TestImageModel(testFixture);
+        // const saveResultRaw = await testMediaData.save();
+        // const saveResult = saveResultRaw.toJSON();
+
+        const testImage = new TestImageModel(testFixture);
+
+        const saveResultRaw = await testImage.save();
+
+        const saveResult = saveResultRaw.toJSON();
+
+        const assetsRootPath = path.resolve(__dirname, '../../public/assets');
+     
+        const statCreated = 
+          await gracefulStat(assetsRootPath, 
+            `${saveResult.id}`, 'original', saveResult.asset_file_name);
+        
+        t.ok(statCreated, 'asset files created');
+
+        const rawDestroyModel 
+          = await TestImageModel.where({id: saveResult.id}).fetch();
+       
+        const destroyModel = rawDestroyModel.toJSON();
+        
+        await rawDestroyModel.destroy(); 
+
+        const deletedStatPath 
+          = path.join(assetsRootPath, `${destroyModel.id}`);
+
+        const statDeleted = 
+          await gracefulStat(deletedStatPath);
+
+        t.notOk(statDeleted, `asset files deleted ${key}`);
+      }
+    } catch (err) {
+      log.error(err);
+    } finally {
+      t.end(); 
+    }
   });
 
   tape('exit', (t) => {
     t.end(); 
     process.exit(0); 
   }); 
-
-
 }
 
 main();

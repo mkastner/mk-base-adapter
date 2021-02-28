@@ -4,6 +4,7 @@
 *.swn
 *.swo
 *.swp
+.DS_Store
 node_modules
 public
 test/assets/work/**/*

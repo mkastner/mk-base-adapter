@@ -7,7 +7,7 @@ const log = require('mk-log');
 const TestPersonModel = require('./models/test-person-model');
 const Vue = require('vue');
 const Vuex = require('vuex');
-const Base = require('../../lib/utils/vuex-base-store');
+const Base = require('../../src/vuex-base-store');
 const clearTable = require('./utils/clear-table');
 const Server = require('../utils/server'); 
 const port = 3001;
@@ -170,7 +170,7 @@ async function main() {
       log.error(err);
     }
   });
-  
+
   await tape('upsert multiple', async (t) => {
     try { 
       await clearTable(TestPersonModel);
