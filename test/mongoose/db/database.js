@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
-const dbUrl = 'mongodb://10.66.66.17/mk_base_adapter_test';
-const log = 'mk-log';
+const dbUrl = 'mongodb://localhost/mk_base_adapter_test';
+const log = require('mk-log');
 
 const connectOptions = {
   useNewUrlParser: true,
-  useFindAndModify: false,
-  useCreateIndex: true,
+  //useFindAndModify: false,
+  //useCreateIndex: true,
   useUnifiedTopology: true
 };
 

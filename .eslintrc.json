@@ -2,34 +2,30 @@
   "env": {
     "browser": true,
     "commonjs": true,
-    "es6": true,
+    "es2021": true,
     "node": true
   },
-  "extends": "eslint:recommended",
-  "parser": "vue-eslint-parser", 
+  "extends": ["eslint:recommended", "prettier"],
+  "plugins": ["prettier", "@babel", "vue"],
   "parserOptions": {
-    "parser": "babel-eslint",
-    "ecmaVersion": 8,
-    "sourceType": "module",
-    "allowImportExportEverywhere": true
+    "ecmaVersion": 2022,
+    "parser": "@babel/eslint-parser",
+    "sourceType": "module"
   },
   "rules": {
-    "no-console":0,
-    "indent": [
+    "no-console": 1,
+    "indent": ["error", 2],
+    "linebreak-style": ["error", "unix"],
+    "quotes": ["error", "single"],
+    "semi": ["error", "always"],
+    "prettier/prettier": [
       "error",
-      2
+      {
+        "singleQuote": true,
+        "onlyUseLocalVersion": false,
+        "arrowParens": "always"
+      }
     ],
-    "linebreak-style": [
-      "error",
-      "unix"
-    ],
-    "quotes": [
-      "error",
-      "single"
-    ],
-    "semi": [
-      "error",
-      "always"
-    ]
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }]
   }
 }

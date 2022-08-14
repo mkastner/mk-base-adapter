@@ -15,6 +15,7 @@ const wait = require('../utils/wait');
 //const qs = require('qs');
 const tape = require('tape');
 const AdapterTestHelpers = require('mk-adapter-test-helpers');
+const AsyncAdapterTestHelpers = require('mk-adapter-test-helpers/async-index.js');
 
 const {
   create,
@@ -49,195 +50,214 @@ const testCarFixtureC = {
   title: 'Mercedes'
 };
 
-tape('Mongoose adapter create', async (t) => {
-   
-  await clearTable(TestPersonModel);
+async function main() {
 
-  try {
-    await clearTable(TestPersonModel);
-    const helperA = AdapterTestHelpers();
-    const reqA = helperA.req;
-    const resA = helperA.res;
+  tape('Mongoose adapter create', async (t) => {
 
-    reqA.body = testPersonFixtureA; 
-    await create(reqA, resA);
-    const createdModel = resA.data;
-    t.equals(reqA.body.last_name, createdModel.last_name, 'created model with field last_name');
+    try {
+      ///await clearTable(TestPersonModel);
+      log.info('after clearTable'); 
+      const helperA = AdapterTestHelpers();
+      const reqA = helperA.req;
+      const resA = helperA.res;
+
+      reqA.body = testPersonFixtureA; 
+      await create(reqA, resA);
+      const createdModel = resA.data;
+      t.equals(reqA.body.last_name, createdModel.last_name, 'created model with field last_name');
+      
+      const helperB = AdapterTestHelpers();
+      const reqB = helperB.req;
+      const resB = helperB.res;
+      reqB.body = {
+        firstName: '',
+        lastName: ''
+      };
+      await create(reqB, resB);
+
+      t.ok(resB.data.error.name === 'ValidationError', 'ValidationError on missing Fields');
+
+
+    } catch (err) {
+      log.error(err);
+    } finally {
+      t.end(); 
+    }
+  });
+
+  tape('Mongoose Adapter update', async (t) => {
     
-    const helperB = AdapterTestHelpers();
-    const reqB = helperB.req;
-    const resB = helperB.res;
-    reqB.body = {
-      firstName: '',
-      lastName: ''
-    };
-    await create(reqB, resB);
+    try {
+   
+      await clearTable(TestPersonModel);
+   
+      log.info('after update clearTable');
+      const helperA = AdapterTestHelpers();
+      const reqA = helperA.req;
+      const resA = helperA.res;
 
-    t.ok(resB.data.error.name === 'ValidationError', 'ValidationError on missing Fields');
+      const createdModelData = 
+        await new TestPersonModel(testPersonFixtureA).save();
+      
+      log.debug('after update createdModelData');
+      
+      reqA.params.id = createdModelData.id;
+      reqA.body = {lastName: 'TestZ'};
+      
+      log.debug('before update');
+
+      await update(reqA, resA);
+     
+      log.debug('after update');
+
+      t.equals(reqA.body.last_name,  resA.data.last_name, 'should be updated');
+    } catch (err) {
+      log.error(err);
+    } finally {
+      t.end(); 
+    }
+  });
+
+  tape('Mongoose Adapter copy', async (t) => {
+    
+    try {
+   
+      await clearTable(TestPersonModel);
+    
+      const createdModel = await new TestPersonModel(testPersonFixtureA).save();
+      const id = createdModel._id;
+      
+      let {req, res} = AdapterTestHelpers();
+
+      req.params.id = id;
+      req.body = {
+        fixOn: 'lastName',
+        include: ['lastName', 'firstName' ],
+      }; 
+
+      await copy(req, res);
+
+      log.info(res.data);
+
+      t.notEqual(id, res.data._id, 'should have created a copy with differnt id');
+      t.equal(createdModel.firstName, res.data.firstName, 'should have created a copy');
 
 
-  } catch (err) {
-    log.error(err);
-  } finally {
-    t.end(); 
-  }
-});
+    } catch (err) {
+      log.error(err);
+    } finally {
+      t.end(); 
+    }
+  });
 
-tape('Mongoose Adapter update', async (t) => {
-  
-  try {
- 
-    await clearTable(TestPersonModel);
- 
-    log.info('after update clearTable');
-    const helperA = AdapterTestHelpers();
-    const reqA = helperA.req;
-    const resA = helperA.res;
-
-    const createdModelData = 
+  tape('Mongoose Adapter list search', async (t) => {
+    
+    try {
+   
+      await clearTable(TestPersonModel);
+    
+      let {req, res} = AdapterTestHelpers();
       await new TestPersonModel(testPersonFixtureA).save();
-    
-    log.debug('after update createdModelData');
-    
-    reqA.params.id = createdModelData.id;
-    reqA.body = {lastName: 'TestZ'};
-    
-    log.debug('before update');
+      const createdModelB = await new TestPersonModel(testPersonFixtureB).save();
 
-    await update(reqA, resA);
+      req.query = `search[firstName]=${createdModelB.firstName}&search[lastName]=${createdModelB.lastName}`; 
+
+      await list(req, res);
+
+      t.ok(res.data.items.length >= 1, 'should have docs');
+    } catch (err) {
+      log.error(err);
+    } finally {
+      t.end(); 
+    }
+  });
+
+  tape('Mongoose Adapter list in', async (t) => {
+    
+    try {
    
-    log.debug('after update');
-
-    t.equals(reqA.body.last_name,  resA.data.last_name, 'should be updated');
-  } catch (err) {
-    log.error(err);
-  } finally {
-    t.end(); 
-  }
-});
-
-tape('Mongoose Adapter copy', async (t) => {
-  
-  try {
- 
-    await clearTable(TestPersonModel);
-  
-    const createdModel = await new TestPersonModel(testPersonFixtureA).save();
-    const id = createdModel._id;
+      await clearTable(TestPersonModel);
+      await clearTable(TestCarModel);
     
-    let {req, res} = AdapterTestHelpers();
+      const {req, res} = AdapterTestHelpers();
+      const createdCarModelA = await new TestCarModel(testCarFixtureA).save();
+      const createdCarModelB = await new TestCarModel(testCarFixtureB).save();
+      const createdCarModelC = await new TestCarModel(testCarFixtureC).save();
+     
+      testPersonFixtureA.cars = [createdCarModelA];
+      testPersonFixtureA.cars.push(createdCarModelB);
+      
+      testPersonFixtureB.cars = [createdCarModelB];
+      testPersonFixtureB.cars.push(createdCarModelA);
+      testPersonFixtureB.cars.push(createdCarModelC);
 
-    req.params.id = id;
-    req.body = {
-      fixOn: 'lastName',
-      include: ['lastName', 'firstName' ],
-    }; 
+      await new TestPersonModel(testPersonFixtureA).save();
+      await new TestPersonModel(testPersonFixtureB).save();
 
-    await copy(req, res);
+      req.query = `in[cars]=${createdCarModelA._id}&in[cars]=${createdCarModelB._id}`; 
 
-    log.info(res.data);
+      await list(req, res);
 
-    t.notEqual(id, res.data._id, 'should have created a copy with differnt id');
-    t.equal(createdModel.firstName, res.data.firstName, 'should have created a copy');
+      log.debug(res.data.items);
 
+      t.ok(res.data.items.length === 2, 'should have 2 docs');
 
-  } catch (err) {
-    log.error(err);
-  } finally {
-    t.end(); 
-  }
-});
+      req.query = `in[cars]=${createdCarModelA._id}`; 
 
-tape('Mongoose Adapter list search', async (t) => {
-  
-  try {
- 
-    await clearTable(TestPersonModel);
-  
-    let {req, res} = AdapterTestHelpers();
-    await new TestPersonModel(testPersonFixtureA).save();
-    const createdModelB = await new TestPersonModel(testPersonFixtureB).save();
+      await list(req, res);
+      
+      t.equal(res.data.items.length, 2, 'should have exactly 2 doc');
 
-    req.query = `search[firstName]=${createdModelB.firstName}&search[lastName]=${createdModelB.lastName}`; 
+      req.query = `in[cars]=${createdCarModelC._id}`; 
 
-    await list(req, res);
+      await list(req, res);
+      
+      t.equal(res.data.items.length, 1, 'should have exactly 1 doc');
 
-    t.ok(res.data.items.length >= 1, 'should have docs');
-  } catch (err) {
-    log.error(err);
-  } finally {
-    t.end(); 
-  }
-});
+    } catch (err) {
+      log.error(err);
+    } finally {
+      t.end(); 
+    }
+  });
 
-tape('Mongoose Adapter list in', async (t) => {
-  
-  try {
- 
-    await clearTable(TestPersonModel);
-    await clearTable(TestCarModel);
-  
-    const {req, res} = AdapterTestHelpers();
-    const createdCarModelA = await new TestCarModel(testCarFixtureA).save();
-    const createdCarModelB = await new TestCarModel(testCarFixtureB).save();
-    const createdCarModelC = await new TestCarModel(testCarFixtureC).save();
+  tape('Mongoose Adapter list range', async (t) => {
+    
+    try {
    
-    testPersonFixtureA.cars = [createdCarModelA];
-    testPersonFixtureA.cars.push(createdCarModelB);
+      await clearTable(TestPersonModel);
+      await clearTable(TestCarModel);
     
-    testPersonFixtureB.cars = [createdCarModelB];
-    testPersonFixtureB.cars.push(createdCarModelA);
-    testPersonFixtureB.cars.push(createdCarModelC);
 
-    await new TestPersonModel(testPersonFixtureA).save();
-    await new TestPersonModel(testPersonFixtureB).save();
+      await new TestPersonModel(testPersonFixtureA).save();
+      await new TestPersonModel(testPersonFixtureB).save();
 
-    req.query = `in[cars]=${createdCarModelA._id}&in[cars]=${createdCarModelB._id}`; 
+      await AdapterTestHelpers(async(req, res) => { 
+        try { 
+          log.info('req', req);
+          log.info('res', res);
 
-    await list(req, res);
+          const queryString = qs.stringify({range: [{
+            field: 'createdAt',
+            comp: 'lt',
+            val: new Date().toISOString()
+          }]}, {encodeValuesOnly: true});
+          req.query = queryString; 
 
-    log.debug(res.data.items);
+          await list(req, res);
 
-    t.ok(res.data.items.length === 2, 'should have 2 docs');
+          log.info(res.data.items);
 
-    req.query = `in[cars]=${createdCarModelA._id}`; 
+          t.equals(res.data.items.length, 2, 'should have 2 docs');
+        } catch (err) {
+          log.error(err);
+        }
+      });
 
-    await list(req, res);
-    
-    t.equal(res.data.items.length, 2, 'should have exactly 2 doc');
-
-    req.query = `in[cars]=${createdCarModelC._id}`; 
-
-    await list(req, res);
-    
-    t.equal(res.data.items.length, 1, 'should have exactly 1 doc');
-
-  } catch (err) {
-    log.error(err);
-  } finally {
-    t.end(); 
-  }
-});
-
-tape('Mongoose Adapter list range', async (t) => {
-  
-  try {
- 
-    await clearTable(TestPersonModel);
-    await clearTable(TestCarModel);
-  
-
-    await new TestPersonModel(testPersonFixtureA).save();
-    await new TestPersonModel(testPersonFixtureB).save();
-
-    await AdapterTestHelpers(async(req, res) => { 
-      try { 
-        log.info('req', req);
-        log.info('res', res);
-
+      AdapterTestHelpers(async(req, res) => { 
         const queryString = qs.stringify({range: [{
           field: 'createdAt',
-          comp: 'lt',
+          comp: 'gt',
           val: new Date().toISOString()
         }]}, {encodeValuesOnly: true});
         req.query = queryString; 
@@ -246,145 +266,128 @@ tape('Mongoose Adapter list range', async (t) => {
 
         log.debug(res.data.items);
 
-        t.equals(res.data.items.length, 2, 'should have 2 docs');
-      } catch (err) {
-        log.error(err);
-      }
-    });
-
-    AdapterTestHelpers(async(req, res) => { 
-      const queryString = qs.stringify({range: [{
-        field: 'createdAt',
-        comp: 'gt',
-        val: new Date().toISOString()
-      }]}, {encodeValuesOnly: true});
-      req.query = queryString; 
-
-      await list(req, res);
-
-      log.debug(res.data.items);
-
-      t.equals(res.data.items.length, 0, 'should have 0 docs');
-    });
+        t.equals(res.data.items.length, 0, 'should have 0 docs');
+      });
 
 
 
+      
+
+    } catch (err) {
+      log.error(err);
+    } finally {
+      t.end(); 
+    }
+  });
+
+
+  tape('Mongoose Adapter upsertMultiple', async (t) => {
     
-
-  } catch (err) {
-    log.error(err);
-  } finally {
-    t.end(); 
-  }
-});
-
-
-tape('Mongoose Adapter upsertMultiple', async (t) => {
-  
-  try {
- 
-    await clearTable(TestPersonModel);
-  
-    let {req, res} = AdapterTestHelpers();
-    const createdModelA = await new TestPersonModel(testPersonFixtureA).save();
-    //const createdModelA = await new TestPersonModel(testPersonFixtureB).save();
-
-    req.body = [createdModelA, testPersonFixtureB];
-    await upsertMultiple(req, res);
-    t.equals(res.data.length,  2, 'one should be created');
- 
-    createdModelA.lastName = 'XPander';
-    req.body = [createdModelA];
-    await upsertMultiple(req, res);
-    t.equals(res.data.length,  1, 'one should be changed');
+    try {
    
-  } catch (err) {
-    log.error(err);
-  } finally {
-    t.end(); 
-  }
-});
-
-tape('Mongoose Adapter remove', async (t) => {
-  
-  try {
-    await clearTable(TestPersonModel);
-    const createdModelA = await new TestPersonModel(testPersonFixtureA).save();
-    let {req, res} = AdapterTestHelpers();
-    req.params.id = createdModelA._id;
-    await remove(req, res);
-    const removeResult = res.data;
-
-    t.ok(removeResult.ok,  'should be deleted');
-  } catch (err) {
-    log.error(err);
-  } finally {
-    t.end(); 
-  }
-
-});
-
-tape('Mongoose Adapter removeMany', async (t) => {
-  
-  try {
-    await clearTable(TestPersonModel);
-    const createdModelA = await new TestPersonModel(testPersonFixtureA).save();
-    await new TestPersonModel(testPersonFixtureA).save();
-    await new TestPersonModel(testPersonFixtureB).save();
-    let {req, res} = AdapterTestHelpers();
-    req.body.ids = [createdModelA._id];
-    await removeMultiple(req, res);
-    const removeResult = res.data;
-    t.ok(removeResult.deletedCount === 1,  'one should be deleted');
-  } catch (err) {
-    log.error(err);
-  } finally {
-    t.end(); 
-  }
-
-});
-
-tape('Mongoose Adapter read', async (t) => {
-  
-  try {
-    await clearTable(TestPersonModel);
-    const createdModelA = await new TestPersonModel(testPersonFixtureA).save();
-    let {req, res} = AdapterTestHelpers();
-    req.params.id = createdModelA._id;
-    await read(req, res);
+      await clearTable(TestPersonModel);
     
-    const readResult = res.data;
-    // id is just a getter for _id 
-    t.ok(readResult.id === createdModelA.id,  'one should be read');
-  } catch (err) {
-    log.error(err);
-  } finally {
-    t.end(); 
-  }
+      let {req, res} = AdapterTestHelpers();
+      const createdModelA = await new TestPersonModel(testPersonFixtureA).save();
+      //const createdModelA = await new TestPersonModel(testPersonFixtureB).save();
 
-});
+      req.body = [createdModelA, testPersonFixtureB];
+      await upsertMultiple(req, res);
+      t.equals(res.data.length,  2, 'one should be created');
+   
+      createdModelA.lastName = 'XPander';
+      req.body = [createdModelA];
+      await upsertMultiple(req, res);
+      t.equals(res.data.length,  1, 'one should be changed');
+     
+    } catch (err) {
+      log.error(err);
+    } finally {
+      t.end(); 
+    }
+  });
 
-tape('Mongoose Adapter touch', async (t) => {
-  
-  try {
-    await clearTable(TestPersonModel);
-    const createdModelA = await new TestPersonModel(testPersonFixtureA).save();
-    let {req, res} = AdapterTestHelpers();
-    req.params.id = createdModelA._id;
-    await wait(1100); 
-    await touch(req, res);
+  tape('Mongoose Adapter remove', async (t) => {
     
-    const readResult = res.data;
-    // id is just a getter for _id 
-    t.ok(readResult.updatedAt > createdModelA.updatedAt,  'should be touched');
-  } catch (err) {
-    log.error(err);
-  } finally {
-    t.end(); 
-    log.info('done');
-  }
-  // last test must always exit
-  process.exit(0);
-});
+    try {
+      await clearTable(TestPersonModel);
+      const createdModelA = await new TestPersonModel(testPersonFixtureA).save();
+      let {req, res} = AdapterTestHelpers();
+      req.params.id = createdModelA._id;
+      await remove(req, res);
+      const removeResult = res.data;
 
+      t.ok(removeResult.ok,  'should be deleted');
+    } catch (err) {
+      log.error(err);
+    } finally {
+      t.end(); 
+    }
 
+  });
+
+  tape('Mongoose Adapter removeMany', async (t) => {
+    
+    try {
+      await clearTable(TestPersonModel);
+      const createdModelA = await new TestPersonModel(testPersonFixtureA).save();
+      await new TestPersonModel(testPersonFixtureA).save();
+      await new TestPersonModel(testPersonFixtureB).save();
+      let {req, res} = AdapterTestHelpers();
+      req.body.ids = [createdModelA._id];
+      await removeMultiple(req, res);
+      const removeResult = res.data;
+      t.ok(removeResult.deletedCount === 1,  'one should be deleted');
+    } catch (err) {
+      log.error(err);
+    } finally {
+      t.end(); 
+    }
+
+  });
+
+  tape('Mongoose Adapter read', async (t) => {
+    
+    try {
+      await clearTable(TestPersonModel);
+      const createdModelA = await new TestPersonModel(testPersonFixtureA).save();
+      let {req, res} = AdapterTestHelpers();
+      req.params.id = createdModelA._id;
+      await read(req, res);
+      
+      const readResult = res.data;
+      // id is just a getter for _id 
+      t.ok(readResult.id === createdModelA.id,  'one should be read');
+    } catch (err) {
+      log.error(err);
+    } finally {
+      t.end(); 
+    }
+
+  });
+
+  tape('Mongoose Adapter touch', async (t) => {
+    
+    try {
+      await clearTable(TestPersonModel);
+      const createdModelA = await new TestPersonModel(testPersonFixtureA).save();
+      let {req, res} = AdapterTestHelpers();
+      req.params.id = createdModelA._id;
+      await wait(1100); 
+      await touch(req, res);
+      
+      const readResult = res.data;
+      // id is just a getter for _id 
+      t.ok(readResult.updatedAt > createdModelA.updatedAt,  'should be touched');
+    } catch (err) {
+      log.error(err);
+    } finally {
+      t.end(); 
+      log.info('done');
+    }
+    // last test must always exit
+    process.exit(0);
+  });
+}
+
+main();

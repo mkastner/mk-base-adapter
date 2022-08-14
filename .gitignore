@@ -7,4 +7,5 @@
 .DS_Store
 node_modules
 public
+session.vim
 test/assets/work/**/*
