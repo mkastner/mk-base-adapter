@@ -15,9 +15,9 @@ const {
   upsertMultiple,
   read,
   list,
-  touch
+  touch,
 } = require('../../lib/bookshelf-adapter.js')(TestPersonModel, {
-  listKey: 'items'
+  listKey: 'items',
 });
 
 const AdapterTestHelpers = require('mk-adapter-test-helpers');
@@ -25,13 +25,13 @@ const AdapterTestHelpers = require('mk-adapter-test-helpers');
 const testPersonFixtureA = {
   parent_id: 1,
   first_name: 'TestA',
-  last_name: 'TestA'
+  last_name: 'TestA',
 };
 
 const testPersonFixtureB = {
   parent_id: 2,
   first_name: 'TestB',
-  last_name: 'TestB'
+  last_name: 'TestB',
 };
 
 async function main() {
@@ -46,7 +46,7 @@ async function main() {
   await tape('Adapter Base create', async (t) => {
     try {
       await clearTable(TestPersonModel);
-      const { req, res } = AdapterTestHelpers();
+      const [req, res] = AdapterTestHelpers();
       req.body = testPersonFixtureA;
       await create(req, res);
       const createdModel = res.data;
@@ -74,7 +74,7 @@ async function main() {
 
       await wait(1100);
 
-      const { req, res } = AdapterTestHelpers();
+      const [req, res] = AdapterTestHelpers();
 
       req.params.id = id;
       await touch(req, res);
@@ -95,7 +95,7 @@ async function main() {
       await clearTable(TestPersonModel);
       // don't clear: need to check whether timestamp for
       // latest record before created works
-      const { req, res } = AdapterTestHelpers();
+      const [req, res] = AdapterTestHelpers();
       req.body = [testPersonFixtureA, testPersonFixtureB];
 
       const countBefore = await TestPersonModel.count();
@@ -117,13 +117,13 @@ async function main() {
   await tape('Adapter Base remove', async (t) => {
     try {
       await clearTable(TestPersonModel);
-      const { req, res } = AdapterTestHelpers();
+      const [req, res] = AdapterTestHelpers();
       const createdModel = await new TestPersonModel(testPersonFixtureA).save();
       const id = createdModel.id;
       req.params.id = id;
       await remove(req, res);
       const removedUser = await TestPersonModel.where({ id }).fetch({
-        require: false
+        require: false,
       });
 
       t.notOk(removedUser, 'should be removed');
@@ -137,7 +137,7 @@ async function main() {
   await tape('Adapter Base removeMultiple', async (t) => {
     try {
       await clearTable(TestPersonModel);
-      const { req, res } = AdapterTestHelpers();
+      const [req, res] = AdapterTestHelpers();
       const createdModelA = await new TestPersonModel(
         testPersonFixtureA
       ).save();
@@ -165,7 +165,7 @@ async function main() {
 
   await tape('Adapter Base read', async (t) => {
     try {
-      const { req, res } = AdapterTestHelpers();
+      const [req, res] = AdapterTestHelpers();
       const createdModel = await new TestPersonModel(testPersonFixtureA).save();
       const id = createdModel.id;
       req.params.id = id;
@@ -184,7 +184,7 @@ async function main() {
     try {
       await clearTable(TestPersonModel);
 
-      let { req, res } = AdapterTestHelpers();
+      let [req, res] = AdapterTestHelpers();
 
       await new TestPersonModel(testPersonFixtureA).save();
       const createdModelB = await new TestPersonModel(
@@ -205,19 +205,16 @@ async function main() {
         'should be found'
       );
 
-      let helpers = AdapterTestHelpers();
+      let [reqA, resA] = AdapterTestHelpers();
 
-      req = helpers.req;
-      res = helpers.res;
-
-      req.query = qs.stringify(
+      reqA.query = qs.stringify(
         { order: [{ by: 'last_name', direction: 'DESC' }] },
         { encodeValuesOnly: true }
       );
 
       //'order[0][by]=last_name&order[0][direction]=DESC';
 
-      await list(req, res);
+      await list(reqA, resA);
 
       t.ok(
         testPersonFixtureB.last_name.toString().trim() ===
@@ -270,14 +267,14 @@ async function main() {
             {
               field: 'updated_at',
               val: encodedDate,
-              comp: 'gt'
-            }
-          ]
+              comp: 'gt',
+            },
+          ],
         },
         { encodeValuesOnly: true }
       );
 
-      const { req, res } = AdapterTestHelpers();
+      const [req, res] = AdapterTestHelpers();
 
       req.query = queryGt;
 
@@ -302,9 +299,9 @@ async function main() {
             {
               field: 'updated_at',
               val: encodedDate,
-              comp: 'lt'
-            }
-          ]
+              comp: 'lt',
+            },
+          ],
         },
         { encodeValuesOnly: true }
       );
@@ -327,7 +324,7 @@ async function main() {
     try {
       await clearTable(TestPersonModel);
 
-      let { req, res } = AdapterTestHelpers();
+      let [req, res] = AdapterTestHelpers();
 
       const createdModelA = await new TestPersonModel(
         testPersonFixtureA
@@ -363,8 +360,8 @@ async function main() {
           list: {
             query(qb) {
               qb.where({ parent_id: 1 });
-            }
-          }
+            },
+          },
         }
       );
       await clearTable(TestPersonModel);
@@ -372,14 +369,14 @@ async function main() {
       //const createdModelB =
       await new TestPersonModel(testPersonFixtureB).save();
 
-      let { req, res } = AdapterTestHelpers();
+      let [req, res] = AdapterTestHelpers();
 
       await list(req, res, null, {
         list: {
           query(qb) {
             qb.where({ parent_id: 1 });
-          }
-        }
+          },
+        },
       });
 
       log.debug(res.data.docs);
