@@ -22,6 +22,7 @@
     "test:plugin:touch:bookshelf": "NODE_ENV=test node test/bookshelf/touch-plugin.test.js",
     "test:plugin:asset:bookshelf": "NODE_ENV=test node test/bookshelf/asset-plugin.test.js",
     "test:plugin:single-asset:bookshelf": "NODE_ENV=test node test/bookshelf/single-asset-plugin.test.js",
+    "test:util:create-hooks": "NODE_ENV=test node test/utils/create-hooks.test.js",
     "test:util:bookshelf": "yarn test:util:vuex-base-store:bookshelf",
     "test:util:vuex-base-store:bookshelf": "NODE_ENV=test node test/bookshelf/vuex-base-store.test.js | tap-spec"
   },

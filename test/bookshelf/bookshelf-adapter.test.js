@@ -1,7 +1,7 @@
 const log = require('mk-log');
-const TestPersonModel = require('./models/test-person-model');
-const clearTable = require('./utils/clear-table');
-const wait = require('../utils/wait');
+const TestPersonModel = require('./models/test-person-model.js');
+const clearTable = require('./utils/clear-table.js');
+const wait = require('../utils/wait.js');
 const Moment = require('moment-timezone');
 //const Moment = require('moment');
 const dateFormat = 'YYYY-MM-DD HH:mm:ss';
