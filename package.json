@@ -67,7 +67,7 @@
     "mk-image-converter": "https://github.com/mkastner/mk-image-converter.git#v0.0.15",
     "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.14",
     "moment": "^2.29.4",
-    "moment-timezone": "^0.5.34",
+    "moment-timezone": "^0.5.35",
     "pluralize": "^7.0.0",
     "qs": "^6.11.0"
   }
