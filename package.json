@@ -42,7 +42,7 @@
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-vue": "^7.0.0",
     "express": "^4.18.1",
-    "knex": "^2.2.0",
+    "knex": "^2.4.0",
     "mk-adapter-test-helpers": "https://github.com/mkastner/mk-adapter-test-helpers.git#v1.0.0",
     "mongo-connect": "^0.0.6",
     "mongoose": "^6.5.2",
